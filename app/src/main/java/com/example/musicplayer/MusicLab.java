@@ -5,20 +5,30 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
 
 import com.example.musicplayer.models.Album;
 import com.example.musicplayer.models.Artist;
 import com.example.musicplayer.models.Music;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MusicLab {
 
+    private static MusicLab instance;
+
     private List<Music> mTracks = new ArrayList<>();
     private List<Album> mAlbums = new ArrayList<>();
     private List<Artist> mArtists = new ArrayList<>();
+
+    public static MusicLab getInstance(Context context){
+        if (instance == null)
+            instance = new MusicLab(context);
+        return instance;
+    }
 
     public MusicLab(Context context) {
         ContentResolver contentResolver = context.getContentResolver();
@@ -26,7 +36,11 @@ public class MusicLab {
         Uri albumUri = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI;
         Uri artistUri = MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI;
 
-        Cursor trackCursor = contentResolver.query(trackUri,null,null,null,null);
+        Cursor trackCursor = contentResolver.query(trackUri,
+                null,
+                MediaStore.Audio.Media.DURATION + ">= 6000",
+                null,
+                null);
         try {
             if (trackCursor.getCount() == 0)
                 return;
@@ -37,7 +51,6 @@ public class MusicLab {
                 String title = trackCursor.getString(trackCursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
                 String album = trackCursor.getString(trackCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
                 String artist = trackCursor.getString(trackCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
-
 //                Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
 //                Uri albumArtUri = ContentUris.withAppendedId(sArtworkUri, id);
                 Music music = new Music(id,title,album,artist);

@@ -1,6 +1,7 @@
 package com.example.musicplayer;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -46,7 +47,7 @@ public class TracksListFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mMusicLab = new MusicLab(getActivity());
+        mMusicLab = MusicLab.getInstance(getActivity());
         mMusics = mMusicLab.getTracks();
     }
 
@@ -77,6 +78,14 @@ public class TracksListFragment extends Fragment {
             super(itemView);
 
             mMusicTitleTextView = itemView.findViewById(R.id.music_title_text_view);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = PlayMusicActivity.newIntent(getActivity(),mMusic.getUri());
+                    startActivity(intent);
+                }
+            });
         }
 
         public void bind(Music music){
