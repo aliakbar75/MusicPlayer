@@ -10,6 +10,10 @@ import android.os.Bundle;
 
 public class MusicListsActivity extends AppCompatActivity {
 
+    private static final int TRACKS = 0;
+    private static final int ALBUMS = 1;
+    private static final int ARTISTS = 2;
+
     private TabLayout mTabLayout;
     private ViewPager mMusicViewPager;
 
@@ -26,11 +30,11 @@ public class MusicListsActivity extends AppCompatActivity {
             @Override
             public Fragment getItem(int i) {
 
-                if(i==0)
+                if(i==TRACKS)
                     return TracksListFragment.newInstance();
-                if(i==1)
+                if(i==ALBUMS)
                     return AlbumsListFragment.newInstance();
-                if(i==2)
+                if(i==ARTISTS)
                     return ArtistsListFragment.newInstance();
 
                 return null;
@@ -45,17 +49,15 @@ public class MusicListsActivity extends AppCompatActivity {
             @Override
             public CharSequence getPageTitle(int position) {
 
-                if(position==0)
+                if(position==TRACKS)
                     return getString(R.string.tracks_list_title);
-                if (position==1)
+                if (position==ALBUMS)
                     return getString(R.string.albums_list_title);
-                if (position==2)
+                if (position==ARTISTS)
                     return getString(R.string.artists_list_title);
 
                 return super.getPageTitle(position);
             }
         });
-
-
     }
 }
