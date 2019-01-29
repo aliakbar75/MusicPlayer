@@ -2,7 +2,10 @@ package com.example.musicplayer;
 
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.AudioManager;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -12,7 +15,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.example.musicplayer.models.Music;
 
@@ -37,6 +42,11 @@ public class PlayMusicFragment extends Fragment {
     private ImageButton mPreviousButton;
     private ImageButton mShuffleButton;
     private ImageButton mRepeatButton;
+
+    private TextView mTitleTextView;
+    private TextView mArtistTextView;
+
+    private ImageView mMusicImageView;
     private SeekBar mSeekBar;
 
     private Timer mTimer;
@@ -90,7 +100,28 @@ public class PlayMusicFragment extends Fragment {
         mShuffleButton = view.findViewById(R.id.shuffle);
         mRepeatButton = view.findViewById(R.id.repeat);
         mSeekBar = view.findViewById(R.id.seek_bar);
+        mTitleTextView = view.findViewById(R.id.music_title_text_view);
+        mArtistTextView = view.findViewById(R.id.music_artist_text_view);
+        mMusicImageView = view.findViewById(R.id.music_image);
 
+        MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+        byte[] rawArt;
+        Bitmap art = null;
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        mediaMetadataRetriever.setDataSource(getActivity(),mMusicUri);
+        rawArt = mediaMetadataRetriever.getEmbeddedPicture();
+        if (rawArt != null){
+            art = BitmapFactory.decodeByteArray(rawArt,0,rawArt.length,options);
+        }
+
+        mMusicImageView.setImageBitmap(art);
+
+
+
+//        String title = mMusicLab.getTrack(mMusicUri).getTitle();
+//        String artistName = mMusicLab.getTrack(mMusicUri).getArtist();
+//        mTitleTextView.setText(title);
+//        mArtistTextView.setText(artistName);
 
         if (mMediaPlayer == null){
             mMediaPlayer = new MediaPlayer();
@@ -109,39 +140,15 @@ public class PlayMusicFragment extends Fragment {
 //        final int[] currentPosition = new int[1];
 //        currentPosition[0] = mMediaPlayer.getCurrentPosition();
 
-        mSeekBar.setMax(mMediaPlayer.getDuration());
+        handleSeekBar();
 
-        mTimer = new Timer();
-        mTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                if (mMediaPlayer != null){
-                    mSeekBar.setProgress(mMediaPlayer.getCurrentPosition());
-                }
+        handleButtonListeners();
 
-            }
-        },0,1000);
 
-        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser && mMediaPlayer != null){
-                    mMediaPlayer.seekTo(progress);
-                }
+        return view;
+    }
 
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-
+    private void handleButtonListeners() {
         mPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -174,7 +181,6 @@ public class PlayMusicFragment extends Fragment {
                 }
             }
         });
-
 
 
         mNextButton.setOnClickListener(new View.OnClickListener() {
@@ -246,9 +252,41 @@ public class PlayMusicFragment extends Fragment {
                 }
             }
         });
+    }
 
+    private void handleSeekBar() {
+        mSeekBar.setMax(mMediaPlayer.getDuration());
 
-        return view;
+        mTimer = new Timer();
+        mTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                if (mMediaPlayer != null){
+                    mSeekBar.setProgress(mMediaPlayer.getCurrentPosition());
+                }
+
+            }
+        },0,1000);
+
+        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && mMediaPlayer != null){
+                    mMediaPlayer.seekTo(progress);
+                }
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
     }
 
     @Override

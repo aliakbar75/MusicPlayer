@@ -2,6 +2,9 @@ package com.example.musicplayer;
 
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,6 +14,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.musicplayer.models.Music;
@@ -77,11 +81,17 @@ public class TracksListFragment extends Fragment {
 
         private Music mMusic;
         private TextView mMusicTitleTextView;
+        private ImageView mMusicImageView;
 
         public MusicHolder(@NonNull View itemView) {
             super(itemView);
 
             mMusicTitleTextView = itemView.findViewById(R.id.music_title_text_view);
+            mMusicImageView = itemView.findViewById(R.id.music_cover_image);
+
+
+
+
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -95,6 +105,18 @@ public class TracksListFragment extends Fragment {
         public void bind(Music music){
             mMusic = music;
             mMusicTitleTextView.setText(music.getTitle());
+
+            MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+            byte[] rawArt;
+            Bitmap art = null;
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            mediaMetadataRetriever.setDataSource(getActivity(),mMusic.getUri());
+            rawArt = mediaMetadataRetriever.getEmbeddedPicture();
+            if (rawArt != null){
+                art = BitmapFactory.decodeByteArray(rawArt,0,rawArt.length,options);
+            }
+
+            mMusicImageView.setImageBitmap(art);
         }
     }
 

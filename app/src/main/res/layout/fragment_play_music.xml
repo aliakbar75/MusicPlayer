@@ -7,6 +7,8 @@
     tools:context=".PlayMusicFragment"
     android:background="@color/play_background">
 
+
+
     <ImageView
         android:id="@+id/music_image"
         android:layout_width="300dp"
@@ -16,6 +18,24 @@
         app:layout_constraintBottom_toTopOf="@id/seek_bar"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"/>
+
+    <TextView
+        android:id="@+id/music_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/_32_dp"
+        android:textSize="32sp"
+        app:layout_constraintTop_toBottomOf="@id/music_image"/>
+
+    <TextView
+        android:id="@+id/artist_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/_32_dp"
+        android:layout_marginRight="@dimen/_32_dp"
+        android:layout_marginBottom="@dimen/_32_dp"
+        android:textSize="24sp"
+        app:layout_constraintTop_toBottomOf="@id/music_title"/>
 
     <SeekBar
         android:id="@+id/seek_bar"
@@ -32,10 +52,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/_32_dp"
-        android:background="@color/play_background"
+        android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_pause_music"
-        android:scaleX="2"
-        android:scaleY="2"
+        android:scaleX="1.5"
+        android:scaleY="1.5"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toLeftOf="@id/next"
         app:layout_constraintLeft_toRightOf="@id/previous"/>
@@ -45,10 +65,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/_32_dp"
-        android:background="@color/play_background"
+        android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_next_music"
-        android:scaleX="2"
-        android:scaleY="2"
+        android:scaleX="1.5"
+        android:scaleY="1.5"
         app:layout_constraintRight_toLeftOf="@id/repeat"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@+id/play"/>
@@ -58,10 +78,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/_32_dp"
-        android:background="@color/play_background"
+        android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_previous_music"
-        android:scaleX="2"
-        android:scaleY="2"
+        android:scaleX="1.5"
+        android:scaleY="1.5"
         app:layout_constraintRight_toLeftOf="@id/play"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@id/shuffle"/>
@@ -71,10 +91,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/_32_dp"
-        android:background="@color/play_background"
+        android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_repeat_all"
-        android:scaleX="2"
-        android:scaleY="2"
+        android:scaleX="1.5"
+        android:scaleY="1.5"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@id/next"/>
@@ -84,10 +104,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/_32_dp"
-        android:background="@color/play_background"
+        android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_shuffle_all"
-        android:scaleX="2"
-        android:scaleY="2"
+        android:scaleX="1.5"
+        android:scaleY="1.5"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintLeft_toLeftOf="parent"

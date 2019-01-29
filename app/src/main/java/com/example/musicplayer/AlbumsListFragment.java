@@ -1,8 +1,14 @@
 package com.example.musicplayer;
 
 
+import android.content.ContentUris;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -11,10 +17,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.musicplayer.models.Album;
-import com.example.musicplayer.models.Music;
 
 import java.util.List;
 
@@ -70,11 +76,15 @@ public class AlbumsListFragment extends Fragment {
 
         private Album mAlbum;
         private TextView mAlbumTitleTextView;
+        private ImageView mAlbumImageView;
 
         public AlbumHolder(@NonNull View itemView) {
             super(itemView);
 
             mAlbumTitleTextView = itemView.findViewById(R.id.music_title_text_view);
+            mAlbumImageView = itemView.findViewById(R.id.music_cover_image);
+
+
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -88,6 +98,20 @@ public class AlbumsListFragment extends Fragment {
         public void bind(Album album){
             mAlbum = album;
             mAlbumTitleTextView.setText(album.getAlbum());
+
+
+
+//            MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+//            byte[] rawArt;
+//            Bitmap art = null;
+//            BitmapFactory.Options options = new BitmapFactory.Options();
+//            mediaMetadataRetriever.setDataSource(getActivity(),mAlbum.getUri());
+//            rawArt = mediaMetadataRetriever.getEmbeddedPicture();
+//            if (rawArt != null){
+//                art = BitmapFactory.decodeByteArray(rawArt,0,rawArt.length,options);
+//            }
+//
+//            mAlbumImageView.setImageBitmap(art);
         }
     }
 

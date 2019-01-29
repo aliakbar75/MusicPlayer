@@ -40,64 +40,15 @@ public class MusicLab {
         Uri albumUri = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI;
         Uri artistUri = MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI;
 
-        Cursor trackCursor = mContentResolver.query(trackUri,
-                null,
-                MediaStore.Audio.Media.DURATION + ">= 6000",
-                null,
-                null);
-        try {
-            if (trackCursor.getCount() == 0)
-                return;
+        if (getTracksList(trackUri)) return;
 
-            trackCursor.moveToFirst();
-            while (!trackCursor.isAfterLast()) {
-                Long id = trackCursor.getLong(trackCursor.getColumnIndex(MediaStore.Audio.Media._ID));
-                String title = trackCursor.getString(trackCursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
-                String album = trackCursor.getString(trackCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
-                String artist = trackCursor.getString(trackCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
-//                Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
-//                Uri albumArtUri = ContentUris.withAppendedId(sArtworkUri, id);
-                Music music = new Music(id,title,album,artist);
-                mTracks.add(music);
-                trackCursor.moveToNext();
-            }
+        if (getAlbumsList(albumUri)) return;
 
+        getArtistsList(artistUri);
 
+    }
 
-        } finally {
-            trackCursor.close();
-        }
-
-        Collections.sort(mTracks, new Comparator<Music>(){
-            public int compare(Music a, Music b){
-                return a.getTitle().compareTo(b.getTitle());
-            }
-        });
-
-        Cursor albumCursor = mContentResolver.query(albumUri,null,null,null,null);
-        try {
-            if (albumCursor.getCount() == 0)
-                return;
-
-            albumCursor.moveToFirst();
-            while (!albumCursor.isAfterLast()) {
-                Long id = albumCursor.getLong(albumCursor.getColumnIndex(MediaStore.Audio.Albums._ID));
-                String album1 = albumCursor.getString(albumCursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM));
-                String artist = albumCursor.getString(albumCursor.getColumnIndex(MediaStore.Audio.Albums.ARTIST));
-                Album album = new Album(id,album1,artist);
-                mAlbums.add(album);
-                albumCursor.moveToNext();
-            }
-        } finally {
-            albumCursor.close();
-        }
-
-        Collections.sort(mAlbums, new Comparator<Album>(){
-            public int compare(Album a, Album b){
-                return a.getAlbum().compareTo(b.getAlbum());
-            }
-        });
-
+    private void getArtistsList(Uri artistUri) {
         Cursor artistCursor = mContentResolver.query(artistUri,null,null,null,null);
         try {
             if (artistCursor.getCount() == 0)
@@ -120,7 +71,66 @@ public class MusicLab {
                 return a.getArtist().compareTo(b.getArtist());
             }
         });
+    }
 
+    private boolean getAlbumsList(Uri albumUri) {
+        Cursor albumCursor = mContentResolver.query(albumUri,null,null,null,null);
+        try {
+            if (albumCursor.getCount() == 0)
+                return true;
+
+            albumCursor.moveToFirst();
+            while (!albumCursor.isAfterLast()) {
+                Long id = albumCursor.getLong(albumCursor.getColumnIndex(MediaStore.Audio.Albums._ID));
+                String album1 = albumCursor.getString(albumCursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM));
+                String artist = albumCursor.getString(albumCursor.getColumnIndex(MediaStore.Audio.Albums.ARTIST));
+                Album album = new Album(id,album1,artist);
+                mAlbums.add(album);
+                albumCursor.moveToNext();
+            }
+        } finally {
+            albumCursor.close();
+        }
+
+        Collections.sort(mAlbums, new Comparator<Album>(){
+            public int compare(Album a, Album b){
+                return a.getAlbum().compareTo(b.getAlbum());
+            }
+        });
+        return false;
+    }
+
+    private boolean getTracksList(Uri trackUri) {
+        Cursor trackCursor = mContentResolver.query(trackUri,
+                null,
+                MediaStore.Audio.Media.DURATION + ">= 6000",
+                null,
+                null);
+        try {
+            if (trackCursor.getCount() == 0)
+                return true;
+
+            trackCursor.moveToFirst();
+            while (!trackCursor.isAfterLast()) {
+                Long id = trackCursor.getLong(trackCursor.getColumnIndex(MediaStore.Audio.Media._ID));
+                String title = trackCursor.getString(trackCursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
+                String album = trackCursor.getString(trackCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
+                String artist = trackCursor.getString(trackCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+                Music music = new Music(id,title,album,artist);
+                mTracks.add(music);
+                trackCursor.moveToNext();
+            }
+
+        } finally {
+            trackCursor.close();
+        }
+
+        Collections.sort(mTracks, new Comparator<Music>(){
+            public int compare(Music a, Music b){
+                return a.getTitle().compareTo(b.getTitle());
+            }
+        });
+        return false;
     }
 
     public List<Music> getTracks(String name) {
@@ -133,6 +143,11 @@ public class MusicLab {
 
         Uri trackUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
 
+        if (getAlbumArtistTracksList(name, tracks, trackUri)) return null;
+        return tracks;
+    }
+
+    private boolean getAlbumArtistTracksList(String name, List<Music> tracks, Uri trackUri) {
         Cursor trackCursor = mContentResolver.query(trackUri,
                 null,
                 MediaStore.Audio.Media.DURATION + ">= 6000 AND " +
@@ -142,7 +157,7 @@ public class MusicLab {
                 null);
         try {
             if (trackCursor.getCount() == 0)
-                return null;
+                return true;
 
             trackCursor.moveToFirst();
             while (!trackCursor.isAfterLast()) {
@@ -150,8 +165,6 @@ public class MusicLab {
                 String title = trackCursor.getString(trackCursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
                 String album = trackCursor.getString(trackCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
                 String artist = trackCursor.getString(trackCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
-//                Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
-//                Uri albumArtUri = ContentUris.withAppendedId(sArtworkUri, id);
                 Music music = new Music(musicId,title,album,artist);
                 tracks.add(music);
                 trackCursor.moveToNext();
@@ -165,7 +178,7 @@ public class MusicLab {
         } finally {
             trackCursor.close();
         }
-        return tracks;
+        return false;
     }
 
     public List<Album> getAlbums() {
@@ -174,5 +187,14 @@ public class MusicLab {
 
     public List<Artist> getArtists() {
         return mArtists;
+    }
+
+    public Music getTrack(Uri uri){
+        for (Music music : mTracks){
+            if (music.getUri().equals(uri)){
+                return music;
+            }
+        }
+        return null;
     }
 }
