@@ -17,7 +17,6 @@ import android.widget.SeekBar;
 import com.example.musicplayer.models.Music;
 
 import java.io.IOException;
-import java.sql.Time;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -31,6 +30,7 @@ import java.util.TimerTask;
 public class PlayMusicFragment extends Fragment {
 
     private static final String ARG_MUSIC_URI = "music_uri";
+    private static final String ARG_ALBUM_ARTIST_NAME = "album_artist_name";
 
     private ImageButton mPlayButton;
     private ImageButton mNextButton;
@@ -45,14 +45,16 @@ public class PlayMusicFragment extends Fragment {
     private MediaPlayer mMediaPlayer;
     private MusicLab mMusicLab;
     private List<Music> mMusics;
+    private String mAlbumArtistName;
 
 
     private Uri mMusicUri;
 
-    public static PlayMusicFragment newInstance(Uri musicUri) {
+    public static PlayMusicFragment newInstance(Uri musicUri,String name) {
 
         Bundle args = new Bundle();
         args.putParcelable(ARG_MUSIC_URI,musicUri);
+        args.putString(ARG_ALBUM_ARTIST_NAME,name);
         PlayMusicFragment fragment = new PlayMusicFragment();
         fragment.setArguments(args);
         return fragment;
@@ -69,7 +71,8 @@ public class PlayMusicFragment extends Fragment {
 
         mMusicLab = MusicLab.getInstance(getActivity());
         mMusicUri = getArguments().getParcelable(ARG_MUSIC_URI);
-        mMusics = mMusicLab.getTracks();
+        mAlbumArtistName = getArguments().getString(ARG_ALBUM_ARTIST_NAME);
+        mMusics = mMusicLab.getTracks(mAlbumArtistName);
         mRepeatAll = true;
 
     }
@@ -152,7 +155,7 @@ public class PlayMusicFragment extends Fragment {
                         iterator = mMusics.iterator();
                     }
                     Uri nextMusicUri = iterator.next().getUri();
-                    Intent intent = PlayMusicActivity.newIntent(getActivity(),nextMusicUri);
+                    Intent intent = PlayMusicActivity.newIntent(getActivity(),nextMusicUri, mAlbumArtistName);
                     startActivity(intent);
                     getActivity().finish();
                 }else {
@@ -173,7 +176,7 @@ public class PlayMusicFragment extends Fragment {
                     iterator = mMusics.iterator();
                 }
                 Uri nextMusicUri = iterator.next().getUri();
-                Intent intent = PlayMusicActivity.newIntent(getActivity(),nextMusicUri);
+                Intent intent = PlayMusicActivity.newIntent(getActivity(),nextMusicUri, mAlbumArtistName);
                 startActivity(intent);
                 getActivity().finish();
             }
@@ -195,7 +198,7 @@ public class PlayMusicFragment extends Fragment {
                     iterator = mMusics.iterator();
                 }
                 Uri nextMusicUri = iterator.next().getUri();
-                Intent intent = PlayMusicActivity.newIntent(getActivity(),nextMusicUri);
+                Intent intent = PlayMusicActivity.newIntent(getActivity(),nextMusicUri, mAlbumArtistName);
                 startActivity(intent);
                 getActivity().finish();
             }
@@ -214,7 +217,7 @@ public class PlayMusicFragment extends Fragment {
                 }
 
                 Uri nextMusicUri = iterator.next().getUri();
-                Intent intent = PlayMusicActivity.newIntent(getActivity(),nextMusicUri);
+                Intent intent = PlayMusicActivity.newIntent(getActivity(),nextMusicUri, mAlbumArtistName);
                 startActivity(intent);
                 getActivity().finish();
             }

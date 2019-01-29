@@ -31,7 +31,7 @@ public class MusicListsActivity extends AppCompatActivity {
             public Fragment getItem(int i) {
 
                 if(i==TRACKS)
-                    return TracksListFragment.newInstance();
+                    return TracksListFragment.newInstance(null);
                 if(i==ALBUMS)
                     return AlbumsListFragment.newInstance();
                 if(i==ARTISTS)

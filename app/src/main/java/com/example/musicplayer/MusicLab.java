@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.widget.LinearLayout;
 
 import com.example.musicplayer.models.Album;
 import com.example.musicplayer.models.Artist;
@@ -14,11 +15,14 @@ import com.example.musicplayer.models.Music;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class MusicLab {
 
     private static MusicLab instance;
+    ContentResolver mContentResolver;
 
     private List<Music> mTracks = new ArrayList<>();
     private List<Album> mAlbums = new ArrayList<>();
@@ -31,12 +35,12 @@ public class MusicLab {
     }
 
     public MusicLab(Context context) {
-        ContentResolver contentResolver = context.getContentResolver();
+        mContentResolver = context.getContentResolver();
         Uri trackUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         Uri albumUri = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI;
         Uri artistUri = MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI;
 
-        Cursor trackCursor = contentResolver.query(trackUri,
+        Cursor trackCursor = mContentResolver.query(trackUri,
                 null,
                 MediaStore.Audio.Media.DURATION + ">= 6000",
                 null,
@@ -57,11 +61,20 @@ public class MusicLab {
                 mTracks.add(music);
                 trackCursor.moveToNext();
             }
+
+
+
         } finally {
             trackCursor.close();
         }
 
-        Cursor albumCursor = contentResolver.query(albumUri,null,null,null,null);
+        Collections.sort(mTracks, new Comparator<Music>(){
+            public int compare(Music a, Music b){
+                return a.getTitle().compareTo(b.getTitle());
+            }
+        });
+
+        Cursor albumCursor = mContentResolver.query(albumUri,null,null,null,null);
         try {
             if (albumCursor.getCount() == 0)
                 return;
@@ -79,7 +92,13 @@ public class MusicLab {
             albumCursor.close();
         }
 
-        Cursor artistCursor = contentResolver.query(artistUri,null,null,null,null);
+        Collections.sort(mAlbums, new Comparator<Album>(){
+            public int compare(Album a, Album b){
+                return a.getAlbum().compareTo(b.getAlbum());
+            }
+        });
+
+        Cursor artistCursor = mContentResolver.query(artistUri,null,null,null,null);
         try {
             if (artistCursor.getCount() == 0)
                 return;
@@ -96,10 +115,57 @@ public class MusicLab {
             artistCursor.close();
         }
 
+        Collections.sort(mArtists, new Comparator<Artist>(){
+            public int compare(Artist a, Artist b){
+                return a.getArtist().compareTo(b.getArtist());
+            }
+        });
+
     }
 
-    public List<Music> getTracks() {
-        return mTracks;
+    public List<Music> getTracks(String name) {
+
+        List<Music> tracks = new ArrayList<>();
+
+        if (name == null){
+            return mTracks;
+        }
+
+        Uri trackUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+
+        Cursor trackCursor = mContentResolver.query(trackUri,
+                null,
+                MediaStore.Audio.Media.DURATION + ">= 6000 AND " +
+                        MediaStore.Audio.Media.ALBUM + " = '" + name + "' OR " +
+                        MediaStore.Audio.Media.ARTIST + " = '" + name + "' " ,
+                null,
+                null);
+        try {
+            if (trackCursor.getCount() == 0)
+                return null;
+
+            trackCursor.moveToFirst();
+            while (!trackCursor.isAfterLast()) {
+                Long musicId = trackCursor.getLong(trackCursor.getColumnIndex(MediaStore.Audio.Media._ID));
+                String title = trackCursor.getString(trackCursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
+                String album = trackCursor.getString(trackCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
+                String artist = trackCursor.getString(trackCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+//                Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
+//                Uri albumArtUri = ContentUris.withAppendedId(sArtworkUri, id);
+                Music music = new Music(musicId,title,album,artist);
+                tracks.add(music);
+                trackCursor.moveToNext();
+            }
+
+            Collections.sort(tracks, new Comparator<Music>(){
+                public int compare(Music a, Music b){
+                    return a.getTitle().compareTo(b.getTitle());
+                }
+            });
+        } finally {
+            trackCursor.close();
+        }
+        return tracks;
     }
 
     public List<Album> getAlbums() {

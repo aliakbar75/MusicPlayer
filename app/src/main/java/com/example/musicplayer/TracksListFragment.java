@@ -23,17 +23,19 @@ import java.util.List;
  */
 public class TracksListFragment extends Fragment {
 
+    private static final String ARG_ALBUM_ARTIST_NAME = "album_artist_name";
     MusicLab mMusicLab;
 
     private RecyclerView mRecyclerView;
     private MusicAdapter mMusicAdapter;
     private List<Music> mMusics;
+    private String mAlbumArtistName;
 
 
-    public static TracksListFragment newInstance() {
+    public static TracksListFragment newInstance(String name) {
         
         Bundle args = new Bundle();
-        
+        args.putString(ARG_ALBUM_ARTIST_NAME,name);
         TracksListFragment fragment = new TracksListFragment();
         fragment.setArguments(args);
         return fragment;
@@ -47,8 +49,10 @@ public class TracksListFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mAlbumArtistName = getArguments().getString(ARG_ALBUM_ARTIST_NAME);
         mMusicLab = MusicLab.getInstance(getActivity());
-        mMusics = mMusicLab.getTracks();
+        mMusics = mMusicLab.getTracks(mAlbumArtistName);
     }
 
     @Override
@@ -82,7 +86,7 @@ public class TracksListFragment extends Fragment {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = PlayMusicActivity.newIntent(getActivity(),mMusic.getUri());
+                    Intent intent = PlayMusicActivity.newIntent(getActivity(),mMusic.getUri(), mAlbumArtistName);
                     startActivity(intent);
                 }
             });
