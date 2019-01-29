@@ -69,6 +69,7 @@ public class PlayMusicFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setRetainInstance(true);
         mMusicLab = MusicLab.getInstance(getActivity());
         mMusicUri = getArguments().getParcelable(ARG_MUSIC_URI);
         mAlbumArtistName = getArguments().getString(ARG_ALBUM_ARTIST_NAME);
@@ -90,16 +91,23 @@ public class PlayMusicFragment extends Fragment {
         mRepeatButton = view.findViewById(R.id.repeat);
         mSeekBar = view.findViewById(R.id.seek_bar);
 
-        mMediaPlayer = new MediaPlayer();
-        try {
-            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mMediaPlayer.setDataSource(getActivity(), mMusicUri);
-            mMediaPlayer.prepare();
-        } catch (IOException e) {
-            e.printStackTrace();
+
+        if (mMediaPlayer == null){
+            mMediaPlayer = new MediaPlayer();
+
+            try {
+                mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                mMediaPlayer.setDataSource(getActivity(), mMusicUri);
+                mMediaPlayer.prepare();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            mMediaPlayer.start();
         }
 
-        mMediaPlayer.start();
+//        final int[] currentPosition = new int[1];
+//        currentPosition[0] = mMediaPlayer.getCurrentPosition();
 
         mSeekBar.setMax(mMediaPlayer.getDuration());
 
@@ -107,14 +115,17 @@ public class PlayMusicFragment extends Fragment {
         mTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                mSeekBar.setProgress(mMediaPlayer.getCurrentPosition());
+                if (mMediaPlayer != null){
+                    mSeekBar.setProgress(mMediaPlayer.getCurrentPosition());
+                }
+
             }
         },0,1000);
 
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser){
+                if (fromUser && mMediaPlayer != null){
                     mMediaPlayer.seekTo(progress);
                 }
 
@@ -245,6 +256,5 @@ public class PlayMusicFragment extends Fragment {
         super.onDestroy();
         mTimer.cancel();
         mMediaPlayer.release();
-
     }
 }
