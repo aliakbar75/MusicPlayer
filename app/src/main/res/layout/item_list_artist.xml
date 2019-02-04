@@ -5,8 +5,7 @@
     android:background="@drawable/item_list_drawable"
     android:layout_marginLeft="@dimen/_16_dp"
     android:layout_marginRight="@dimen/_16_dp"
-    android:layout_marginTop="@dimen/_8_dp"
-    android:layout_marginBottom="@dimen/_8_dp">
+    android:layout_marginTop="12dp">
 
     <TextView
         android:id="@+id/music_artist_text_view"
@@ -15,6 +14,6 @@
         android:gravity="center"
         android:layout_gravity="center"
         android:layout_width="match_parent"
-        android:layout_height="100dp" />
+        android:layout_height="90dp" />
 
 </LinearLayout>

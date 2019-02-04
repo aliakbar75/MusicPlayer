@@ -1,6 +1,7 @@
 package com.example.musicplayer;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,6 +10,7 @@ import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -22,6 +24,7 @@ import android.widget.TextView;
 import com.example.musicplayer.models.Music;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -35,36 +38,50 @@ import java.util.TimerTask;
 public class PlayMusicFragment extends Fragment {
 
     private static final String ARG_MUSIC_URI = "music_uri";
-    private static final String ARG_ALBUM_ARTIST_NAME = "album_artist_name";
+//    private static final String ARG_ALBUM_ARTIST_NAME = "album_artist_name";
+    private static final int NEXT_MUSIC = 0;
+    private static final int PREVIOUS_MUSIC = 1;
+    private static final int SHUFFLE_MUSIC = 2;
 
     private ImageButton mPlayButton;
     private ImageButton mNextButton;
     private ImageButton mPreviousButton;
     private ImageButton mShuffleButton;
     private ImageButton mRepeatButton;
+    private ImageButton mFavoriteButton;
+    private ImageButton mPlayListButton;
 
     private TextView mTitleTextView;
     private TextView mArtistTextView;
+    private TextView mMusicTimePastTextView;
+    private TextView mMusicTotalTimeTextView;
 
     private ImageView mMusicImageView;
     private SeekBar mSeekBar;
 
     private Timer mTimer;
+    private Handler mHandler;
     private boolean mRepeatAll;
 
     private MediaPlayer mMediaPlayer;
     private MusicLab mMusicLab;
-    private List<Music> mMusics;
-    private String mAlbumArtistName;
-
+//    private List<Music> mMusics;
+//    private String mAlbumArtistName;
 
     private Uri mMusicUri;
 
-    public static PlayMusicFragment newInstance(Uri musicUri,String name) {
+    private Callbacks mCallbacks;
+
+    public interface Callbacks {
+        void changeMusic(Uri musicUri,int action);
+//        boolean isCurrentItem(Uri musicUri);
+    }
+
+    public static PlayMusicFragment newInstance(Uri musicUri) {
 
         Bundle args = new Bundle();
         args.putParcelable(ARG_MUSIC_URI,musicUri);
-        args.putString(ARG_ALBUM_ARTIST_NAME,name);
+//        args.putString(ARG_ALBUM_ARTIST_NAME,name);
         PlayMusicFragment fragment = new PlayMusicFragment();
         fragment.setArguments(args);
         return fragment;
@@ -76,14 +93,31 @@ public class PlayMusicFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        if (context instanceof Callbacks) {
+            mCallbacks = (Callbacks) context;
+        } else {
+            throw new RuntimeException("Activity not impl callback");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
+    }
+
+    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setRetainInstance(true);
         mMusicLab = MusicLab.getInstance(getActivity());
         mMusicUri = getArguments().getParcelable(ARG_MUSIC_URI);
-        mAlbumArtistName = getArguments().getString(ARG_ALBUM_ARTIST_NAME);
-        mMusics = mMusicLab.getTracks(mAlbumArtistName);
+//        mAlbumArtistName = getArguments().getString(ARG_ALBUM_ARTIST_NAME);
+//        mMusics = mMusicLab.getTracks(mAlbumArtistName);
         mRepeatAll = true;
 
     }
@@ -99,9 +133,13 @@ public class PlayMusicFragment extends Fragment {
         mPreviousButton = view.findViewById(R.id.previous);
         mShuffleButton = view.findViewById(R.id.shuffle);
         mRepeatButton = view.findViewById(R.id.repeat);
+        mFavoriteButton = view.findViewById(R.id.favorite);
+        mPlayListButton = view.findViewById(R.id.play_list);
         mSeekBar = view.findViewById(R.id.seek_bar);
-        mTitleTextView = view.findViewById(R.id.music_title_text_view);
-        mArtistTextView = view.findViewById(R.id.music_artist_text_view);
+        mTitleTextView = view.findViewById(R.id.music_title);
+        mArtistTextView = view.findViewById(R.id.artist_name);
+        mMusicTimePastTextView = view.findViewById(R.id.music_time_past);
+        mMusicTotalTimeTextView = view.findViewById(R.id.music_total_time);
         mMusicImageView = view.findViewById(R.id.music_image);
 
         MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
@@ -116,12 +154,10 @@ public class PlayMusicFragment extends Fragment {
 
         mMusicImageView.setImageBitmap(art);
 
-
-
-//        String title = mMusicLab.getTrack(mMusicUri).getTitle();
-//        String artistName = mMusicLab.getTrack(mMusicUri).getArtist();
-//        mTitleTextView.setText(title);
-//        mArtistTextView.setText(artistName);
+        String title = mMusicLab.getTrack(mMusicUri).getTitle();
+        String artistName = mMusicLab.getTrack(mMusicUri).getArtist();
+        mTitleTextView.setText(title);
+        mArtistTextView.setText(artistName);
 
         if (mMediaPlayer == null){
             mMediaPlayer = new MediaPlayer();
@@ -135,10 +171,14 @@ public class PlayMusicFragment extends Fragment {
             }
 
             mMediaPlayer.start();
+
+//            if (mCallbacks.isCurrentItem(mMusicUri)){
+//
+//            }
         }
 
-//        final int[] currentPosition = new int[1];
-//        currentPosition[0] = mMediaPlayer.getCurrentPosition();
+        String musicTotalTime = new SimpleDateFormat("mm:ss").format(mMediaPlayer.getDuration());
+        mMusicTotalTimeTextView.setText(musicTotalTime.substring(1));
 
         handleSeekBar();
 
@@ -166,16 +206,8 @@ public class PlayMusicFragment extends Fragment {
             @Override
             public void onCompletion(MediaPlayer mp) {
                 if (mRepeatAll){
-                    Iterator<Music> iterator = mMusics.iterator();
-                    while(!iterator.next().getUri().equals(mMusicUri)){
-                    }
-                    if (!iterator.hasNext()){
-                        iterator = mMusics.iterator();
-                    }
-                    Uri nextMusicUri = iterator.next().getUri();
-                    Intent intent = PlayMusicActivity.newIntent(getActivity(),nextMusicUri, mAlbumArtistName);
-                    startActivity(intent);
-                    getActivity().finish();
+                    mCallbacks.changeMusic(mMusicUri,NEXT_MUSIC);
+
                 }else {
                     mMediaPlayer.start();
                 }
@@ -186,57 +218,23 @@ public class PlayMusicFragment extends Fragment {
         mNextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Iterator<Music> iterator = mMusics.iterator();
-                while(!iterator.next().getUri().equals(mMusicUri)){
-                }
-                if (!iterator.hasNext()){
-                    iterator = mMusics.iterator();
-                }
-                Uri nextMusicUri = iterator.next().getUri();
-                Intent intent = PlayMusicActivity.newIntent(getActivity(),nextMusicUri, mAlbumArtistName);
-                startActivity(intent);
-                getActivity().finish();
+                mCallbacks.changeMusic(mMusicUri,NEXT_MUSIC);
             }
         });
 
         mPreviousButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Iterator<Music> iterator = mMusics.iterator();
-                while(!iterator.next().getUri().equals(mMusicUri)){
-                }
-                for (int i=0; i<mMusics.size()-2; i++){
-                    if (!iterator.hasNext()){
-                        iterator = mMusics.iterator();
-                    }
-                    iterator.next();
-                }
-                if (!iterator.hasNext()){
-                    iterator = mMusics.iterator();
-                }
-                Uri nextMusicUri = iterator.next().getUri();
-                Intent intent = PlayMusicActivity.newIntent(getActivity(),nextMusicUri, mAlbumArtistName);
-                startActivity(intent);
-                getActivity().finish();
+
+                mCallbacks.changeMusic(mMusicUri,PREVIOUS_MUSIC);
             }
         });
 
         mShuffleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Iterator<Music> iterator = mMusics.iterator();
-                Random random = new Random();
-                for (int i=0; i<random.nextInt(mMusics.size()); i++){
-                    if (!iterator.hasNext()){
-                        iterator = mMusics.iterator();
-                    }
-                    iterator.next();
-                }
 
-                Uri nextMusicUri = iterator.next().getUri();
-                Intent intent = PlayMusicActivity.newIntent(getActivity(),nextMusicUri, mAlbumArtistName);
-                startActivity(intent);
-                getActivity().finish();
+                mCallbacks.changeMusic(mMusicUri,SHUFFLE_MUSIC);
             }
         });
 
@@ -252,21 +250,55 @@ public class PlayMusicFragment extends Fragment {
                 }
             }
         });
+
+        mFavoriteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        mPlayListButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
     }
 
     private void handleSeekBar() {
         mSeekBar.setMax(mMediaPlayer.getDuration());
 
-        mTimer = new Timer();
-        mTimer.scheduleAtFixedRate(new TimerTask() {
+        mHandler = new Handler();
+
+        getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (mMediaPlayer != null){
-                    mSeekBar.setProgress(mMediaPlayer.getCurrentPosition());
+                try {
+                    if(mMediaPlayer != null){
+                        String musicPastTime = new SimpleDateFormat("mm:ss").format(mMediaPlayer.getCurrentPosition());
+                        mMusicTimePastTextView.setText(musicPastTime.substring(1));
+                        mSeekBar.setProgress(mMediaPlayer.getCurrentPosition());
+                    }
+                    mHandler.postDelayed(this, 1000);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Thread.currentThread().interrupt();
                 }
 
             }
-        },0,1000);
+        });
+
+//        mTimer = new Timer();
+//        mTimer.scheduleAtFixedRate(new TimerTask() {
+//            @Override
+//            public void run() {
+//                if (mMediaPlayer != null){
+//                    mSeekBar.setProgress(mMediaPlayer.getCurrentPosition());
+//                }
+//
+//            }
+//        },0,1000);
 
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -292,7 +324,13 @@ public class PlayMusicFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mTimer.cancel();
+//        mTimer.cancel();
         mMediaPlayer.release();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+//        mTimer.cancel();
     }
 }

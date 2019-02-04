@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".TracksListFragment"
-    android:id="@+id/tracks_recycler_view">
+    android:id="@+id/tracks_recycler_view"
+    android:background="@drawable/list_background">
 
 </android.support.v7.widget.RecyclerView>

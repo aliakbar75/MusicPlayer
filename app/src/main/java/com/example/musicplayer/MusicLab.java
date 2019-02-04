@@ -40,9 +40,9 @@ public class MusicLab {
         Uri albumUri = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI;
         Uri artistUri = MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI;
 
-        if (getTracksList(trackUri)) return;
+        getTracksList(trackUri);
 
-        if (getAlbumsList(albumUri)) return;
+        getAlbumsList(albumUri);
 
         getArtistsList(artistUri);
 
@@ -73,11 +73,11 @@ public class MusicLab {
         });
     }
 
-    private boolean getAlbumsList(Uri albumUri) {
+    private void getAlbumsList(Uri albumUri) {
         Cursor albumCursor = mContentResolver.query(albumUri,null,null,null,null);
         try {
             if (albumCursor.getCount() == 0)
-                return true;
+                return;
 
             albumCursor.moveToFirst();
             while (!albumCursor.isAfterLast()) {
@@ -97,10 +97,9 @@ public class MusicLab {
                 return a.getAlbum().compareTo(b.getAlbum());
             }
         });
-        return false;
     }
 
-    private boolean getTracksList(Uri trackUri) {
+    private void getTracksList(Uri trackUri) {
         Cursor trackCursor = mContentResolver.query(trackUri,
                 null,
                 MediaStore.Audio.Media.DURATION + ">= 6000",
@@ -108,7 +107,7 @@ public class MusicLab {
                 null);
         try {
             if (trackCursor.getCount() == 0)
-                return true;
+                return;
 
             trackCursor.moveToFirst();
             while (!trackCursor.isAfterLast()) {
@@ -130,7 +129,6 @@ public class MusicLab {
                 return a.getTitle().compareTo(b.getTitle());
             }
         });
-        return false;
     }
 
     public List<Music> getTracks(String name) {
@@ -143,11 +141,12 @@ public class MusicLab {
 
         Uri trackUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
 
-        if (getAlbumArtistTracksList(name, tracks, trackUri)) return null;
+        getAlbumArtistTracksList(name, tracks, trackUri);
         return tracks;
     }
 
-    private boolean getAlbumArtistTracksList(String name, List<Music> tracks, Uri trackUri) {
+
+    private void getAlbumArtistTracksList(String name, List<Music> tracks, Uri trackUri) {
         Cursor trackCursor = mContentResolver.query(trackUri,
                 null,
                 MediaStore.Audio.Media.DURATION + ">= 6000 AND " +
@@ -157,7 +156,7 @@ public class MusicLab {
                 null);
         try {
             if (trackCursor.getCount() == 0)
-                return true;
+                return;
 
             trackCursor.moveToFirst();
             while (!trackCursor.isAfterLast()) {
@@ -178,7 +177,6 @@ public class MusicLab {
         } finally {
             trackCursor.close();
         }
-        return false;
     }
 
     public List<Album> getAlbums() {
