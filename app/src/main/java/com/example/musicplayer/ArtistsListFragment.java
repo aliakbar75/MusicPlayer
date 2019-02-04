@@ -13,8 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.musicplayer.models.Album;
 import com.example.musicplayer.models.Artist;
+import com.example.musicplayer.models.MusicLab;
 
 import java.util.List;
 
@@ -47,7 +47,7 @@ public class ArtistsListFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mMusicLab = new MusicLab(getActivity());
+        mMusicLab = MusicLab.getInstance(getActivity());
         mArtists = mMusicLab.getArtists();
     }
 
@@ -79,7 +79,7 @@ public class ArtistsListFragment extends Fragment {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = AlbumTracksActivity.newIntent(getActivity(),mArtist.getArtist());
+                    Intent intent = AlbumTracksActivity.newIntent(getActivity(),mArtist.getMArtist(),false);
                     startActivity(intent);
                 }
             });
@@ -87,7 +87,7 @@ public class ArtistsListFragment extends Fragment {
 
         public void bind(Artist artist){
             mArtist = artist;
-            mArtistTitleTextView.setText(artist.getArtist());
+            mArtistTitleTextView.setText(artist.getMArtist());
         }
     }
 

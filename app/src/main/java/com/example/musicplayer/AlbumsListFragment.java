@@ -1,14 +1,8 @@
 package com.example.musicplayer;
 
 
-import android.content.ContentUris;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.MediaMetadataRetriever;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -21,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.musicplayer.models.Album;
+import com.example.musicplayer.models.MusicLab;
 
 import java.util.List;
 
@@ -53,7 +48,7 @@ public class AlbumsListFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mMusicLab = new MusicLab(getActivity());
+        mMusicLab = MusicLab.getInstance(getActivity());
         mAlbums = mMusicLab.getAlbums();
     }
 
@@ -89,7 +84,7 @@ public class AlbumsListFragment extends Fragment {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = AlbumTracksActivity.newIntent(getActivity(),mAlbum.getAlbum());
+                    Intent intent = AlbumTracksActivity.newIntent(getActivity(),mAlbum.getMAlbum(),true);
                     startActivity(intent);
                 }
             });
@@ -97,7 +92,7 @@ public class AlbumsListFragment extends Fragment {
 
         public void bind(Album album){
             mAlbum = album;
-            mAlbumTitleTextView.setText(album.getAlbum());
+            mAlbumTitleTextView.setText(album.getMAlbum());
 
 
 

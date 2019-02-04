@@ -1,8 +1,8 @@
 package com.example.musicplayer;
 
 
+import android.content.ContentUris;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
@@ -11,6 +11,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -21,15 +22,11 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.example.musicplayer.models.Music;
+import com.example.musicplayer.models.MusicLab;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
 import java.util.Timer;
-import java.util.TimerTask;
 
 
 /**
@@ -37,7 +34,7 @@ import java.util.TimerTask;
  */
 public class PlayMusicFragment extends Fragment {
 
-    private static final String ARG_MUSIC_URI = "music_uri";
+    private static final String ARG_MUSIC_ID = "music_id";
 //    private static final String ARG_ALBUM_ARTIST_NAME = "album_artist_name";
     private static final int NEXT_MUSIC = 0;
     private static final int PREVIOUS_MUSIC = 1;
@@ -68,19 +65,20 @@ public class PlayMusicFragment extends Fragment {
 //    private List<Music> mMusics;
 //    private String mAlbumArtistName;
 
+    private Long mMusicId;
     private Uri mMusicUri;
 
     private Callbacks mCallbacks;
 
     public interface Callbacks {
-        void changeMusic(Uri musicUri,int action);
+        void changeMusic(Long musicId,int action);
 //        boolean isCurrentItem(Uri musicUri);
     }
 
-    public static PlayMusicFragment newInstance(Uri musicUri) {
+    public static PlayMusicFragment newInstance(Long musicId) {
 
         Bundle args = new Bundle();
-        args.putParcelable(ARG_MUSIC_URI,musicUri);
+        args.putSerializable(ARG_MUSIC_ID,musicId);
 //        args.putString(ARG_ALBUM_ARTIST_NAME,name);
         PlayMusicFragment fragment = new PlayMusicFragment();
         fragment.setArguments(args);
@@ -115,7 +113,7 @@ public class PlayMusicFragment extends Fragment {
 
         setRetainInstance(true);
         mMusicLab = MusicLab.getInstance(getActivity());
-        mMusicUri = getArguments().getParcelable(ARG_MUSIC_URI);
+        mMusicId = (Long) getArguments().getSerializable(ARG_MUSIC_ID);
 //        mAlbumArtistName = getArguments().getString(ARG_ALBUM_ARTIST_NAME);
 //        mMusics = mMusicLab.getTracks(mAlbumArtistName);
         mRepeatAll = true;
@@ -142,6 +140,10 @@ public class PlayMusicFragment extends Fragment {
         mMusicTotalTimeTextView = view.findViewById(R.id.music_total_time);
         mMusicImageView = view.findViewById(R.id.music_image);
 
+        Long musicId = mMusicLab.getTrack(mMusicId).getMMusicId();
+        mMusicUri = ContentUris.withAppendedId(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, musicId);
+
         MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
         byte[] rawArt;
         Bitmap art = null;
@@ -154,8 +156,8 @@ public class PlayMusicFragment extends Fragment {
 
         mMusicImageView.setImageBitmap(art);
 
-        String title = mMusicLab.getTrack(mMusicUri).getTitle();
-        String artistName = mMusicLab.getTrack(mMusicUri).getArtist();
+        String title = mMusicLab.getTrack(mMusicId).getMTitle();
+        String artistName = mMusicLab.getTrack(mMusicId).getMArtist();
         mTitleTextView.setText(title);
         mArtistTextView.setText(artistName);
 
@@ -206,7 +208,7 @@ public class PlayMusicFragment extends Fragment {
             @Override
             public void onCompletion(MediaPlayer mp) {
                 if (mRepeatAll){
-                    mCallbacks.changeMusic(mMusicUri,NEXT_MUSIC);
+                    mCallbacks.changeMusic(mMusicId,NEXT_MUSIC);
 
                 }else {
                     mMediaPlayer.start();
@@ -218,7 +220,7 @@ public class PlayMusicFragment extends Fragment {
         mNextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCallbacks.changeMusic(mMusicUri,NEXT_MUSIC);
+                mCallbacks.changeMusic(mMusicId,NEXT_MUSIC);
             }
         });
 
@@ -226,7 +228,7 @@ public class PlayMusicFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                mCallbacks.changeMusic(mMusicUri,PREVIOUS_MUSIC);
+                mCallbacks.changeMusic(mMusicId,PREVIOUS_MUSIC);
             }
         });
 
@@ -234,7 +236,7 @@ public class PlayMusicFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                mCallbacks.changeMusic(mMusicUri,SHUFFLE_MUSIC);
+                mCallbacks.changeMusic(mMusicId,SHUFFLE_MUSIC);
             }
         });
 

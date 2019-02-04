@@ -2,15 +2,13 @@ package com.example.musicplayer;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.example.musicplayer.models.Music;
+import com.example.musicplayer.models.MusicLab;
 
 import java.util.Iterator;
 import java.util.List;
@@ -18,22 +16,27 @@ import java.util.Random;
 
 public class PlayMusicActivity extends AppCompatActivity implements PlayMusicFragment.Callbacks{
 
-    private static final String EXTRA_MUSIC_URI = "music_uri";
+    private static final String EXTRA_MUSIC_ID = "music_id";
     private static final String EXTRA_ALBUM_ARTIST_NAME = "album_artist_name";
+    private static final String EXTRA_IS_ALBUM_ARTIST_LIST = "is_album_artist_list";
+    private static final String EXTRA_IS_ALBUM = "is_album";
     private static final int NEXT_MUSIC = 0;
     private static final int PREVIOUS_MUSIC = 1;
     private static final int SHUFFLE_MUSIC = 2;
+
 
     private ViewPager mViewPager;
     private FragmentManager mFragmentManager;
 
     private List<Music> mMusics;
-    private Uri mCurrentMusicUri;
+    private Long mCurrentMusicId;
 
-    public static Intent newIntent(Context context, Uri musicUri,String name){
+    public static Intent newIntent(Context context, Long musicId, String name,boolean isAlbumArtistList,boolean isAlbum){
         Intent intent = new Intent(context,PlayMusicActivity.class);
-        intent.putExtra(EXTRA_MUSIC_URI,musicUri);
+        intent.putExtra(EXTRA_MUSIC_ID,musicId);
         intent.putExtra(EXTRA_ALBUM_ARTIST_NAME,name);
+        intent.putExtra(EXTRA_IS_ALBUM_ARTIST_LIST,isAlbumArtistList);
+        intent.putExtra(EXTRA_IS_ALBUM,isAlbum);
         return intent;
     }
 
@@ -44,10 +47,17 @@ public class PlayMusicActivity extends AppCompatActivity implements PlayMusicFra
 
 //        mViewPager = findViewById(R.id.play_music_view_pager);
 
-        mCurrentMusicUri = getIntent().getParcelableExtra(EXTRA_MUSIC_URI);
+        mCurrentMusicId = (Long) getIntent().getSerializableExtra(EXTRA_MUSIC_ID);
         String name = getIntent().getStringExtra(EXTRA_ALBUM_ARTIST_NAME);
+        boolean isAlbumArtistList = getIntent().getBooleanExtra(EXTRA_IS_ALBUM_ARTIST_LIST,false);
+        boolean isAlbum = getIntent().getBooleanExtra(EXTRA_IS_ALBUM,false);
 
-        mMusics = MusicLab.getInstance(this).getTracks(name);
+        if (!isAlbumArtistList){
+            mMusics = MusicLab.getInstance(this).getTracks();
+        }else {
+            mMusics = MusicLab.getInstance(this).getTracksByAlbumArtistName(name,isAlbum);
+        }
+
 
 
 //        mViewPager.setAdapter(new FragmentStatePagerAdapter(getSupportFragmentManager()) {
@@ -72,14 +82,14 @@ public class PlayMusicActivity extends AppCompatActivity implements PlayMusicFra
 
         if (mFragmentManager.findFragmentById(R.id.play_music_view_pager) == null) {
             mFragmentManager.beginTransaction()
-                    .add(R.id.play_music_view_pager,PlayMusicFragment.newInstance(mCurrentMusicUri))
+                    .add(R.id.play_music_view_pager,PlayMusicFragment.newInstance(mCurrentMusicId))
                     .commit();
         }
     }
 
     @Override
-    public void changeMusic(Uri musicUri, int action) {
-        mCurrentMusicUri = musicUri;
+    public void changeMusic(Long musicId, int action) {
+        mCurrentMusicId = musicId;
         action(action);
     }
 
@@ -95,21 +105,21 @@ public class PlayMusicActivity extends AppCompatActivity implements PlayMusicFra
     private void action(int action){
         if (action == NEXT_MUSIC){
             Iterator<Music> iterator = mMusics.iterator();
-            while(!iterator.next().getUri().equals(mCurrentMusicUri)){
+            while(!iterator.next().getMId().equals(mCurrentMusicId)){
             }
             if (!iterator.hasNext()){
                 iterator = mMusics.iterator();
             }
-            Uri nextMusicUri = iterator.next().getUri();
+            Long nextMusicId = iterator.next().getMId();
 //            mViewPager.setCurrentItem(findCurrentItem(nextMusicUri));
 
             mFragmentManager.beginTransaction()
-                    .replace(R.id.play_music_view_pager,PlayMusicFragment.newInstance(nextMusicUri))
+                    .replace(R.id.play_music_view_pager,PlayMusicFragment.newInstance(nextMusicId))
                     .commit();
 
         }else if (action == PREVIOUS_MUSIC){
             Iterator<Music> iterator = mMusics.iterator();
-            while(!iterator.next().getUri().equals(mCurrentMusicUri)){
+            while(!iterator.next().getMId().equals(mCurrentMusicId)){
             }
             for (int i=0; i<mMusics.size()-2; i++){
                 if (!iterator.hasNext()){
@@ -120,11 +130,11 @@ public class PlayMusicActivity extends AppCompatActivity implements PlayMusicFra
             if (!iterator.hasNext()){
                 iterator = mMusics.iterator();
             }
-            Uri nextMusicUri = iterator.next().getUri();
+            Long nextMusicId = iterator.next().getMId();
 //            mViewPager.setCurrentItem(findCurrentItem(nextMusicUri));
 
             mFragmentManager.beginTransaction()
-                    .replace(R.id.play_music_view_pager,PlayMusicFragment.newInstance(nextMusicUri))
+                    .replace(R.id.play_music_view_pager,PlayMusicFragment.newInstance(nextMusicId))
                     .commit();
 
         }else if (action == SHUFFLE_MUSIC){
@@ -137,11 +147,11 @@ public class PlayMusicActivity extends AppCompatActivity implements PlayMusicFra
                 iterator.next();
             }
 
-            Uri nextMusicUri = iterator.next().getUri();
+            Long nextMusicId = iterator.next().getMId();
 //            mViewPager.setCurrentItem(findCurrentItem(nextMusicUri));
 
             mFragmentManager.beginTransaction()
-                    .replace(R.id.play_music_view_pager,PlayMusicFragment.newInstance(nextMusicUri))
+                    .replace(R.id.play_music_view_pager,PlayMusicFragment.newInstance(nextMusicId))
                     .commit();
         }
     }
