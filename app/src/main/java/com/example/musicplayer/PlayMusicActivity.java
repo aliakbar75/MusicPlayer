@@ -20,6 +20,7 @@ public class PlayMusicActivity extends AppCompatActivity implements PlayMusicFra
     private static final String EXTRA_ALBUM_ARTIST_NAME = "album_artist_name";
     private static final String EXTRA_IS_ALBUM_ARTIST_LIST = "is_album_artist_list";
     private static final String EXTRA_IS_ALBUM = "is_album";
+    private static final String EXTRA_IS_FAVORITE = "is_favorite";
     private static final int NEXT_MUSIC = 0;
     private static final int PREVIOUS_MUSIC = 1;
     private static final int SHUFFLE_MUSIC = 2;
@@ -31,12 +32,13 @@ public class PlayMusicActivity extends AppCompatActivity implements PlayMusicFra
     private List<Music> mMusics;
     private Long mCurrentMusicId;
 
-    public static Intent newIntent(Context context, Long musicId, String name,boolean isAlbumArtistList,boolean isAlbum){
+    public static Intent newIntent(Context context, Long musicId, String name,boolean isAlbumArtistList,boolean isAlbum,boolean isFavorite){
         Intent intent = new Intent(context,PlayMusicActivity.class);
         intent.putExtra(EXTRA_MUSIC_ID,musicId);
         intent.putExtra(EXTRA_ALBUM_ARTIST_NAME,name);
         intent.putExtra(EXTRA_IS_ALBUM_ARTIST_LIST,isAlbumArtistList);
         intent.putExtra(EXTRA_IS_ALBUM,isAlbum);
+        intent.putExtra(EXTRA_IS_FAVORITE,isFavorite);
         return intent;
     }
 
@@ -51,9 +53,13 @@ public class PlayMusicActivity extends AppCompatActivity implements PlayMusicFra
         String name = getIntent().getStringExtra(EXTRA_ALBUM_ARTIST_NAME);
         boolean isAlbumArtistList = getIntent().getBooleanExtra(EXTRA_IS_ALBUM_ARTIST_LIST,false);
         boolean isAlbum = getIntent().getBooleanExtra(EXTRA_IS_ALBUM,false);
+        boolean isFavorite = getIntent().getBooleanExtra(EXTRA_IS_FAVORITE,false);
 
         if (!isAlbumArtistList){
-            mMusics = MusicLab.getInstance(this).getTracks();
+            if (!isFavorite)
+                mMusics = MusicLab.getInstance(this).getTracks();
+            else
+                mMusics = MusicLab.getInstance(this).getFavoriteTracks();
         }else {
             mMusics = MusicLab.getInstance(this).getTracksByAlbumArtistName(name,isAlbum);
         }

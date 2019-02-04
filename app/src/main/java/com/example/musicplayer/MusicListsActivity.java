@@ -13,9 +13,11 @@ import android.view.MenuItem;
 
 public class MusicListsActivity extends AppCompatActivity {
 
-    private static final int TRACKS = 0;
-    private static final int ALBUMS = 1;
-    private static final int ARTISTS = 2;
+    private static final int FAVORITES = 0;
+    private static final int TRACKS = 1;
+    private static final int ALBUMS = 2;
+    private static final int ARTISTS = 3;
+
 
     private TabLayout mTabLayout;
     private ViewPager mMusicViewPager;
@@ -45,6 +47,8 @@ public class MusicListsActivity extends AppCompatActivity {
             @Override
             public Fragment getItem(int i) {
 
+                if(i==FAVORITES)
+                    return FavoritesListFragment.newInstance();
                 if(i==TRACKS)
                     return TracksListFragment.newInstance(null,false,false);
                 if(i==ALBUMS)
@@ -57,14 +61,16 @@ public class MusicListsActivity extends AppCompatActivity {
 
             @Override
             public int getCount() {
-                return 3;
+                return 4;
             }
 
             @Nullable
             @Override
             public CharSequence getPageTitle(int position) {
 
-                if(position==TRACKS)
+                if (position==FAVORITES)
+                    return getString(R.string.favorites_list_title);
+                if (position==TRACKS)
                     return getString(R.string.tracks_list_title);
                 if (position==ALBUMS)
                     return getString(R.string.albums_list_title);
@@ -74,6 +80,9 @@ public class MusicListsActivity extends AppCompatActivity {
                 return super.getPageTitle(position);
             }
         });
+
+        mMusicViewPager.setCurrentItem(TRACKS);
+
     }
 
 }

@@ -181,6 +181,22 @@ public class MusicLab {
 
     }
 
+    public List<Music> getFavoriteTracks(){
+        List<Music> tracks = new ArrayList<>();
+
+        tracks =  mMusicDao.queryBuilder()
+                .where(MusicDao.Properties.MIsFavorite.eq(true))
+                .list();
+
+        Collections.sort(tracks, new Comparator<Music>(){
+            public int compare(Music a, Music b){
+                return a.getMTitle().compareTo(b.getMTitle());
+            }
+        });
+
+        return tracks;
+    }
+
     public List<Music> getTracksByAlbumArtistName(String name, boolean isAlbum){
 
         List<Music> tracks = new ArrayList<>();

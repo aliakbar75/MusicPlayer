@@ -22,6 +22,7 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.example.musicplayer.models.Music;
 import com.example.musicplayer.models.MusicLab;
 
 import java.io.IOException;
@@ -161,6 +162,13 @@ public class PlayMusicFragment extends Fragment {
         mTitleTextView.setText(title);
         mArtistTextView.setText(artistName);
 
+        if (mMusicLab.getTrack(mMusicId).getMIsFavorite()){
+            mFavoriteButton.setImageResource(R.drawable.ic_favorite_music);
+        }else {
+            mFavoriteButton.setImageResource(R.drawable.ic_no_favorite_music);
+        }
+
+
         if (mMediaPlayer == null){
             mMediaPlayer = new MediaPlayer();
 
@@ -254,9 +262,19 @@ public class PlayMusicFragment extends Fragment {
         });
 
         mFavoriteButton.setOnClickListener(new View.OnClickListener() {
+
+            Music mMusic = mMusicLab.getTrack(mMusicId);
             @Override
             public void onClick(View v) {
-
+                if(!mMusic.getMIsFavorite()){
+                    mMusic.setMIsFavorite(true);
+                    mMusicLab.updateMusic(mMusic);
+                    mFavoriteButton.setImageResource(R.drawable.ic_favorite_music);
+                }else {
+                    mMusic.setMIsFavorite(false);
+                    mMusicLab.updateMusic(mMusic);
+                    mFavoriteButton.setImageResource(R.drawable.ic_no_favorite_music);
+                }
             }
         });
 

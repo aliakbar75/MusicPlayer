@@ -113,7 +113,12 @@ public class TracksListFragment extends Fragment {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = PlayMusicActivity.newIntent(getActivity(),mMusic.getMId(), mAlbumArtistName,mIsAlbumArtistList,mIsAlbum);
+                    Intent intent = PlayMusicActivity.newIntent(getActivity(),
+                            mMusic.getMId(),
+                            mAlbumArtistName,
+                            mIsAlbumArtistList,
+                            mIsAlbum,
+                            false);
                     startActivity(intent);
                 }
             });
