@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".AddLyricsFragment"
+    android:background="@drawable/list_background">
+
+    <android.support.design.widget.TextInputEditText
+        android:id="@+id/lyrics_text"
+        android:textColor="@android:color/white"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="@dimen/_32_dp"
+        android:layout_marginLeft="@dimen/_32_dp"
+        android:layout_marginTop="@dimen/_16_dp"
+        android:maxLines="2"
+        android:gravity="center"
+        android:hint="@string/lyric"
+        android:textColorHint="@android:color/darker_gray"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
+
+    <android.support.design.widget.TextInputEditText
+        android:id="@+id/duration"
+        android:textColor="@android:color/white"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="@dimen/_32_dp"
+        android:layout_marginLeft="@dimen/_32_dp"
+        android:layout_marginTop="@dimen/_16_dp"
+        android:maxLines="1"
+        android:gravity="center"
+        android:hint="@string/duration"
+        android:textColorHint="@android:color/darker_gray"
+        app:layout_constraintTop_toBottomOf="@+id/lyrics_text"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:inputType="number"/>
+
+    <!--<SeekBar-->
+        <!--android:id="@+id/seek_bar"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginLeft="@dimen/_24_dp"-->
+        <!--android:layout_marginRight="@dimen/_24_dp"-->
+        <!--android:layout_marginBottom="@dimen/_16_dp"-->
+        <!--app:layout_constraintBottom_toTopOf="@id/add_lyrics"-->
+        <!--app:layout_constraintLeft_toLeftOf="parent"-->
+        <!--app:layout_constraintRight_toRightOf="parent"/>-->
+
+    <android.support.design.button.MaterialButton
+        android:id="@+id/add_lyrics"
+        android:text="@string/add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
+
+    <android.support.design.button.MaterialButton
+        android:id="@+id/cancel"
+        android:text="@string/cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/add_lyrics"/>
+
+
+</android.support.constraint.ConstraintLayout>

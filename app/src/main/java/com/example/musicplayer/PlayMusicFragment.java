@@ -36,7 +36,8 @@ import java.util.Timer;
 public class PlayMusicFragment extends Fragment {
 
     private static final String ARG_MUSIC_ID = "music_id";
-//    private static final String ARG_ALBUM_ARTIST_NAME = "album_artist_name";
+    private static final String ADD_LYRIC = "add_lyric";
+    //    private static final String ARG_ALBUM_ARTIST_NAME = "album_artist_name";
     private static final int NEXT_MUSIC = 0;
     private static final int PREVIOUS_MUSIC = 1;
     private static final int SHUFFLE_MUSIC = 2;
@@ -51,6 +52,7 @@ public class PlayMusicFragment extends Fragment {
     private ImageButton mRepeatButton;
     private ImageButton mFavoriteButton;
     private ImageButton mPlayListButton;
+    private ImageButton mLyricButton;
 
     private TextView mTitleTextView;
     private TextView mArtistTextView;
@@ -73,6 +75,7 @@ public class PlayMusicFragment extends Fragment {
 //    private String mAlbumArtistName;
 
     private Long mMusicId;
+    private Long mTrackId;
     private Uri mMusicUri;
 
     private Callbacks mCallbacks;
@@ -141,6 +144,7 @@ public class PlayMusicFragment extends Fragment {
         mRepeatButton = view.findViewById(R.id.repeat);
         mFavoriteButton = view.findViewById(R.id.favorite);
         mPlayListButton = view.findViewById(R.id.play_list);
+        mLyricButton = view.findViewById(R.id.lyrics);
         mSeekBar = view.findViewById(R.id.seek_bar);
         mTitleTextView = view.findViewById(R.id.music_title);
         mArtistTextView = view.findViewById(R.id.artist_name);
@@ -150,9 +154,9 @@ public class PlayMusicFragment extends Fragment {
         mNoShuffle = view.findViewById(R.id.no_shuffle);
         mNoRepeat = view.findViewById(R.id.no_repeat);
 
-        Long musicId = mMusicLab.getTrack(mMusicId).getMMusicId();
+        mTrackId = mMusicLab.getTrack(mMusicId).getMMusicId();
         mMusicUri = ContentUris.withAppendedId(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, musicId);
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mTrackId);
 
         MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
         byte[] rawArt;
@@ -309,6 +313,16 @@ public class PlayMusicFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
+            }
+        });
+
+        mLyricButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMediaPlayer.pause();
+                mPlayButton.setImageResource(R.drawable.ic_play_music);
+                AddLyricsFragment addLyricsFragment = AddLyricsFragment.newInstance(mTrackId,mMediaPlayer.getCurrentPosition());
+                addLyricsFragment.show(getFragmentManager(),ADD_LYRIC);
             }
         });
     }

@@ -20,6 +20,7 @@ public class MusicLab {
     private MusicDao mMusicDao;
     private AlbumDao mAlbumDao;
     private ArtistDao mArtistDao;
+    private LyricDao mLyricDao;
 
     private List<Music> mTracks = new ArrayList<>();
     private List<Album> mAlbums = new ArrayList<>();
@@ -41,6 +42,7 @@ public class MusicLab {
         DaoSession daoSession = new DaoMaster(database).newSession();
 
         mMusicDao = daoSession.getMusicDao();
+        mLyricDao = daoSession.getLyricDao();
 //        mAlbumDao = daoSession.getAlbumDao();
 //        mArtistDao = daoSession.getArtistDao();
 
@@ -71,6 +73,26 @@ public class MusicLab {
 
     public void updateMusic(Music music){
         mMusicDao.update(music);
+    }
+
+    public void addLyric(Lyric lyric){
+        mLyricDao.insert(lyric);
+    }
+
+    public void updateLyric(Lyric lyric){
+        mLyricDao.update(lyric);
+    }
+
+    public void deleteLyric(Lyric lyric){
+        mLyricDao.delete(lyric);
+    }
+
+    public Lyric getLyric(Long musicId, int time){
+        return mLyricDao.queryBuilder()
+                .where(LyricDao.Properties.MMusicId.eq(musicId))
+                .where(LyricDao.Properties.MLyricTime.eq(time))
+                .unique();
+
     }
 
     private void getArtistsList(Uri artistUri) {
