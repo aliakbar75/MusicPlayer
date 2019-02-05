@@ -94,12 +94,16 @@ public class FavoritesListFragment extends Fragment {
 
         private Music mMusic;
         private TextView mMusicTitleTextView;
+        private TextView mMusicAlbumTextView;
+        private TextView mMusicArtistTextView;
         private ImageView mMusicImageView;
 
         public MusicHolder(@NonNull View itemView) {
             super(itemView);
 
             mMusicTitleTextView = itemView.findViewById(R.id.music_title_text_view);
+            mMusicAlbumTextView = itemView.findViewById(R.id.music_album_text_view);
+            mMusicArtistTextView = itemView.findViewById(R.id.music_artist_text_view);
             mMusicImageView = itemView.findViewById(R.id.music_cover_image);
 
 
@@ -122,6 +126,8 @@ public class FavoritesListFragment extends Fragment {
         public void bind(Music music){
             mMusic = music;
             mMusicTitleTextView.setText(music.getMTitle());
+            mMusicAlbumTextView.setText(music.getMAlbum());
+            mMusicArtistTextView.setText(music.getMArtist());
 
             Uri musicUri = ContentUris.withAppendedId(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, music.getMMusicId());

@@ -70,16 +70,17 @@ public class AlbumsListFragment extends Fragment {
     private class AlbumHolder extends RecyclerView.ViewHolder {
 
         private Album mAlbum;
-        private TextView mAlbumTitleTextView;
+        private TextView mMusicAlbumTextView;
+        private TextView mMusicArtistTextView;
         private ImageView mAlbumImageView;
 
         public AlbumHolder(@NonNull View itemView) {
             super(itemView);
 
-            mAlbumTitleTextView = itemView.findViewById(R.id.music_title_text_view);
+            mMusicAlbumTextView = itemView.findViewById(R.id.music_album_text_view);
+            mMusicArtistTextView = itemView.findViewById(R.id.music_artist_text_view);
+
             mAlbumImageView = itemView.findViewById(R.id.music_cover_image);
-
-
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -92,7 +93,8 @@ public class AlbumsListFragment extends Fragment {
 
         public void bind(Album album){
             mAlbum = album;
-            mAlbumTitleTextView.setText(album.getMAlbum());
+            mMusicAlbumTextView.setText(album.getMAlbum());
+            mMusicArtistTextView.setText(album.getMArtist());
 
 
 
@@ -122,7 +124,7 @@ public class AlbumsListFragment extends Fragment {
         @Override
         public AlbumHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
             LayoutInflater inflater = LayoutInflater.from(getActivity());
-            View view = inflater.inflate(R.layout.item_list_track, viewGroup, false);
+            View view = inflater.inflate(R.layout.item_list_album, viewGroup, false);
             AlbumHolder albumHolder = new AlbumHolder(view);
             return albumHolder;
         }
