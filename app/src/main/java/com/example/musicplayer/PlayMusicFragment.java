@@ -40,6 +40,9 @@ public class PlayMusicFragment extends Fragment {
     private static final int NEXT_MUSIC = 0;
     private static final int PREVIOUS_MUSIC = 1;
     private static final int SHUFFLE_MUSIC = 2;
+    private static final int REPEAT_ALL = 0;
+    private static final int REPEAT_ONE = 1;
+    private static final int NO_REPEAT = 2;
 
     private ImageButton mPlayButton;
     private ImageButton mNextButton;
@@ -55,11 +58,14 @@ public class PlayMusicFragment extends Fragment {
     private TextView mMusicTotalTimeTextView;
 
     private ImageView mMusicImageView;
+    private ImageView mNoShuffle;
+    private ImageView mNoRepeat;
     private SeekBar mSeekBar;
 
     private Timer mTimer;
     private Handler mHandler;
-    private boolean mRepeatAll;
+    private int mRepeatAll;
+    private boolean mShuffle;
 
     private MediaPlayer mMediaPlayer;
     private MusicLab mMusicLab;
@@ -117,7 +123,8 @@ public class PlayMusicFragment extends Fragment {
         mMusicId = (Long) getArguments().getSerializable(ARG_MUSIC_ID);
 //        mAlbumArtistName = getArguments().getString(ARG_ALBUM_ARTIST_NAME);
 //        mMusics = mMusicLab.getTracks(mAlbumArtistName);
-        mRepeatAll = true;
+        mRepeatAll = 0;
+        mShuffle = false;
 
     }
 
@@ -140,6 +147,8 @@ public class PlayMusicFragment extends Fragment {
         mMusicTimePastTextView = view.findViewById(R.id.music_time_past);
         mMusicTotalTimeTextView = view.findViewById(R.id.music_total_time);
         mMusicImageView = view.findViewById(R.id.music_image);
+        mNoShuffle = view.findViewById(R.id.no_shuffle);
+        mNoRepeat = view.findViewById(R.id.no_repeat);
 
         Long musicId = mMusicLab.getTrack(mMusicId).getMMusicId();
         mMusicUri = ContentUris.withAppendedId(
@@ -215,11 +224,18 @@ public class PlayMusicFragment extends Fragment {
         mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                if (mRepeatAll){
-                    mCallbacks.changeMusic(mMusicId,NEXT_MUSIC);
-
+                if (mRepeatAll == REPEAT_ALL){
+                    if (mShuffle){
+                        mCallbacks.changeMusic(mMusicId,SHUFFLE_MUSIC);
+                    }else {
+                        mCallbacks.changeMusic(mMusicId,NEXT_MUSIC);
+                    }
+                }else if (mRepeatAll == REPEAT_ONE){
+                    mMediaPlayer.start();
                 }else {
                     mMediaPlayer.start();
+                    mMediaPlayer.pause();
+                    mPlayButton.setImageResource(R.drawable.ic_play_music);
                 }
             }
         });
@@ -244,19 +260,30 @@ public class PlayMusicFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                mCallbacks.changeMusic(mMusicId,SHUFFLE_MUSIC);
+                if (mShuffle){
+                    mNoShuffle.setVisibility(View.VISIBLE);
+                    mShuffle = false;
+                }else {
+                    mNoShuffle.setVisibility(View.GONE);
+                    mShuffle = true;
+                }
+//                mCallbacks.changeMusic(mMusicId,SHUFFLE_MUSIC);
             }
         });
 
         mRepeatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mRepeatAll){
+                if (mRepeatAll==REPEAT_ALL){
                     mRepeatButton.setImageResource(R.drawable.ic_repeat_one);
-                    mRepeatAll = false;
-                }else {
+                    mRepeatAll = REPEAT_ONE;
+                }else if (mRepeatAll==REPEAT_ONE){
+                    mNoRepeat.setVisibility(View.VISIBLE);
+                    mRepeatAll = NO_REPEAT;
+                }else if (mRepeatAll == NO_REPEAT){
+                    mNoRepeat.setVisibility(View.GONE);
                     mRepeatButton.setImageResource(R.drawable.ic_repeat_all);
-                    mRepeatAll = true;
+                    mRepeatAll = REPEAT_ALL;
                 }
             }
         });

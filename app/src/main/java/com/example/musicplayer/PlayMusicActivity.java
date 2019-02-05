@@ -21,6 +21,8 @@ public class PlayMusicActivity extends AppCompatActivity implements PlayMusicFra
     private static final String EXTRA_IS_ALBUM_ARTIST_LIST = "is_album_artist_list";
     private static final String EXTRA_IS_ALBUM = "is_album";
     private static final String EXTRA_IS_FAVORITE = "is_favorite";
+    private static final String EXTRA_IS_SEARCH = "is_search";
+    private static final String EXTRA_SEARCH_TYPE = "search_type";
     private static final int NEXT_MUSIC = 0;
     private static final int PREVIOUS_MUSIC = 1;
     private static final int SHUFFLE_MUSIC = 2;
@@ -32,13 +34,22 @@ public class PlayMusicActivity extends AppCompatActivity implements PlayMusicFra
     private List<Music> mMusics;
     private Long mCurrentMusicId;
 
-    public static Intent newIntent(Context context, Long musicId, String name,boolean isAlbumArtistList,boolean isAlbum,boolean isFavorite){
+    public static Intent newIntent(Context context,
+                                   Long musicId,
+                                   String name,
+                                   boolean isAlbumArtistList,
+                                   boolean isAlbum,
+                                   boolean isFavorite,
+                                   boolean isSearch,
+                                   int searchType){
         Intent intent = new Intent(context,PlayMusicActivity.class);
         intent.putExtra(EXTRA_MUSIC_ID,musicId);
         intent.putExtra(EXTRA_ALBUM_ARTIST_NAME,name);
         intent.putExtra(EXTRA_IS_ALBUM_ARTIST_LIST,isAlbumArtistList);
         intent.putExtra(EXTRA_IS_ALBUM,isAlbum);
         intent.putExtra(EXTRA_IS_FAVORITE,isFavorite);
+        intent.putExtra(EXTRA_IS_SEARCH,isSearch);
+        intent.putExtra(EXTRA_SEARCH_TYPE,searchType);
         return intent;
     }
 
@@ -54,10 +65,15 @@ public class PlayMusicActivity extends AppCompatActivity implements PlayMusicFra
         boolean isAlbumArtistList = getIntent().getBooleanExtra(EXTRA_IS_ALBUM_ARTIST_LIST,false);
         boolean isAlbum = getIntent().getBooleanExtra(EXTRA_IS_ALBUM,false);
         boolean isFavorite = getIntent().getBooleanExtra(EXTRA_IS_FAVORITE,false);
+        boolean isSearch = getIntent().getBooleanExtra(EXTRA_IS_SEARCH,false);
+        int searchType = getIntent().getIntExtra(EXTRA_SEARCH_TYPE,0);
 
         if (!isAlbumArtistList){
             if (!isFavorite)
-                mMusics = MusicLab.getInstance(this).getTracks();
+                if (!isSearch)
+                    mMusics = MusicLab.getInstance(this).getTracks();
+                else
+                    mMusics = MusicLab.getInstance(this).search(name,searchType);
             else
                 mMusics = MusicLab.getInstance(this).getFavoriteTracks();
         }else {

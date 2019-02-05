@@ -3,6 +3,7 @@ package com.example.musicplayer;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -17,7 +18,7 @@ public class MusicListsActivity extends AppCompatActivity {
     private static final int TRACKS = 1;
     private static final int ALBUMS = 2;
     private static final int ARTISTS = 3;
-
+    private static final String DIALOG_SEARCH = "dialog_search";
 
     private TabLayout mTabLayout;
     private ViewPager mMusicViewPager;
@@ -31,6 +32,9 @@ public class MusicListsActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
+        SearchDialogFragment searchDialogFragment = SearchDialogFragment.newInstance();
+        searchDialogFragment.show(getSupportFragmentManager(),DIALOG_SEARCH);
         return super.onOptionsItemSelected(item);
     }
 
@@ -84,5 +88,4 @@ public class MusicListsActivity extends AppCompatActivity {
         mMusicViewPager.setCurrentItem(TRACKS);
 
     }
-
 }

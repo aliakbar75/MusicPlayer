@@ -18,6 +18,8 @@ public class MusicLab {
     private static MusicLab instance;
     private ContentResolver mContentResolver;
     private MusicDao mMusicDao;
+    private AlbumDao mAlbumDao;
+    private ArtistDao mArtistDao;
 
     private List<Music> mTracks = new ArrayList<>();
     private List<Album> mAlbums = new ArrayList<>();
@@ -39,6 +41,8 @@ public class MusicLab {
         DaoSession daoSession = new DaoMaster(database).newSession();
 
         mMusicDao = daoSession.getMusicDao();
+//        mAlbumDao = daoSession.getAlbumDao();
+//        mArtistDao = daoSession.getArtistDao();
 
         mContentResolver = context.getContentResolver();
         Uri trackUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
@@ -57,6 +61,14 @@ public class MusicLab {
         mMusicDao.insert(music);
     }
 
+//    public void addAlbum(Album album){
+//        mAlbumDao.insert(album);
+//    }
+//
+//    public void addArtist(Artist artist){
+//        mArtistDao.insert(artist);
+//    }
+
     public void updateMusic(Music music){
         mMusicDao.update(music);
     }
@@ -74,6 +86,7 @@ public class MusicLab {
                 Artist artist = new Artist();
                 artist.setMArtistId(id);
                 artist.setMArtist(artist1);
+//                addArtist(artist);
                 mArtists.add(artist);
                 artistCursor.moveToNext();
             }
@@ -103,6 +116,7 @@ public class MusicLab {
                 album.setMAlbumId(id);
                 album.setMAlbum(album1);
                 album.setMArtist(artist);
+//                addAlbum(album);
                 mAlbums.add(album);
                 albumCursor.moveToNext();
             }
@@ -220,6 +234,33 @@ public class MusicLab {
         return tracks;
     }
 
+    public List<Music> search(String searchText,int searchType){
+        List<Music> tracks = new ArrayList<>();
+
+        if (searchType == 0){
+            tracks = mMusicDao.queryBuilder()
+                    .where(MusicDao.Properties.MTitle.like("%" + searchText + "%"))
+                    .list();
+        }else if (searchType == 1){
+            tracks = mMusicDao.queryBuilder()
+                    .where(MusicDao.Properties.MAlbum.like("%" + searchText + "%"))
+                    .list();
+        }else {
+            tracks = mMusicDao.queryBuilder()
+                    .where(MusicDao.Properties.MArtist.like("%" + searchText + "%"))
+                    .list();
+
+        }
+
+        Collections.sort(tracks, new Comparator<Music>(){
+            public int compare(Music a, Music b){
+                return a.getMTitle().compareTo(b.getMTitle());
+            }
+        });
+
+        return tracks;
+    }
+
 
 //    private void getAlbumArtistTracksList(String name, List<Music> tracks, Uri trackUri) {
 //        Cursor trackCursor = mContentResolver.query(trackUri,
@@ -261,10 +302,38 @@ public class MusicLab {
 //    }
 
     public List<Album> getAlbums() {
+
+//        List<Album> albums = new ArrayList<>();
+//
+//
+//        albums =  mAlbumDao.queryBuilder()
+//                .list();
+//
+//        Collections.sort(albums, new Comparator<Album>(){
+//            public int compare(Album a, Album b){
+//                return a.getMAlbum().compareTo(b.getMAlbum());
+//            }
+//        });
+//
+//        return albums;
         return mAlbums;
     }
 
     public List<Artist> getArtists() {
+//        List<Artist> artists = new ArrayList<>();
+//
+//
+//        artists =  mArtistDao.queryBuilder()
+//                .list();
+//
+//        Collections.sort(artists, new Comparator<Artist>(){
+//            public int compare(Artist a, Artist b){
+//                return a.getMArtist().compareTo(b.getMArtist());
+//            }
+//        });
+//
+//        return artists;
+
         return mArtists;
     }
 

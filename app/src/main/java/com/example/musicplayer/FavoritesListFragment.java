@@ -111,7 +111,9 @@ public class FavoritesListFragment extends Fragment {
                             null,
                             false,
                             false,
-                            true);
+                            true,
+                            false,
+                            0);
                     startActivity(intent);
                 }
             });

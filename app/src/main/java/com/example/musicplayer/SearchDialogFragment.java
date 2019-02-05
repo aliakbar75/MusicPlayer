@@ -10,14 +10,20 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputEditText;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.example.musicplayer.models.Music;
@@ -29,70 +35,91 @@ import java.util.List;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class TracksListFragment extends Fragment {
+public class SearchDialogFragment extends DialogFragment {
 
-    private static final String ARG_ALBUM_ARTIST_NAME = "album_artist_name";
-    private static final String ARG_IS_ALBUM_ARTIST_LIST = "is_album_artist_list";
-    private static final String ARG_IS_ALBUM = "is_album";
-    private MusicLab mMusicLab;
-
+    private TextInputEditText mTextInputEditText;
+    private RadioGroup mRadioGroup;
+    private RadioButton mTracksSearchRadioButton;
+    private RadioButton mAlbumsSearchRadioButton;
+    private RadioButton mArtistsSearchRadioButton;
+    private ImageButton mSearchImageButton;
     private RecyclerView mRecyclerView;
+
     private MusicAdapter mMusicAdapter;
     private List<Music> mMusics;
-    private String mAlbumArtistName;
-    private boolean mIsAlbumArtistList;
-    private boolean mIsAlbum;
+    private int mSearchType;
+    private final String[] mSearchText = new String[1];
 
 
-    public static TracksListFragment newInstance(String name,boolean isAlbumArtistList,boolean isAlbum) {
-        
+
+
+    public static SearchDialogFragment newInstance() {
+
         Bundle args = new Bundle();
-        args.putString(ARG_ALBUM_ARTIST_NAME,name);
-        args.putBoolean(ARG_IS_ALBUM_ARTIST_LIST,isAlbumArtistList);
-        args.putBoolean(ARG_IS_ALBUM,isAlbum);
-        TracksListFragment fragment = new TracksListFragment();
+
+        SearchDialogFragment fragment = new SearchDialogFragment();
         fragment.setArguments(args);
         return fragment;
     }
 
 
-    public TracksListFragment() {
+    public SearchDialogFragment() {
         // Required empty public constructor
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        mAlbumArtistName = getArguments().getString(ARG_ALBUM_ARTIST_NAME);
-        mIsAlbumArtistList = getArguments().getBoolean(ARG_IS_ALBUM_ARTIST_LIST);
-        mIsAlbum = getArguments().getBoolean(ARG_IS_ALBUM);
-        mMusicLab = MusicLab.getInstance(getActivity());
-        if (!mIsAlbumArtistList){
-            mMusics = mMusicLab.getTracks();
-        }else {
-            mMusics = mMusicLab.getTracksByAlbumArtistName(mAlbumArtistName,mIsAlbum);
-        }
-
+    public void onStart() {
+        super.onStart();
+        getDialog().getWindow()
+                .setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_tracks_list, container, false);
-        mRecyclerView = view.findViewById(R.id.tracks_recycler_view);
+        View view = inflater.inflate(R.layout.fragment_search_dialog, container, false);
+        mTextInputEditText = view.findViewById(R.id.search_text);
+        mTracksSearchRadioButton = view.findViewById(R.id.search_tracks);
+        mAlbumsSearchRadioButton = view.findViewById(R.id.search_albums);
+        mArtistsSearchRadioButton = view.findViewById(R.id.search_artists);
+        mSearchImageButton = view.findViewById(R.id.search_button);
+        mRecyclerView = view.findViewById(R.id.search_recycler_view);
+
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        if (mMusicAdapter == null){
-            mMusicAdapter = new MusicAdapter(mMusics);
-            mRecyclerView.setAdapter(mMusicAdapter);
-        }
-//        else {
-//            mMusicAdapter.setTasks(mTasks);
-//            mMusicAdapter.notifyDataSetChanged();
-//        }
+
+        mMusics = MusicLab.getInstance(getActivity()).search(mSearchText[0], mSearchType);
+
+        mTracksSearchRadioButton.setChecked(true);
+
+        mSearchImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mSearchText[0] = mTextInputEditText.getText().toString();
+
+                if (mTracksSearchRadioButton.isChecked()){
+                    mSearchType = 0;
+                }else if (mAlbumsSearchRadioButton.isChecked()){
+                    mSearchType = 1;
+                }else if (mArtistsSearchRadioButton.isChecked()){
+                    mSearchType = 2;
+                }
+                mMusics = MusicLab.getInstance(getActivity()).search(mSearchText[0], mSearchType);
+
+                if (mMusicAdapter == null){
+                    mMusicAdapter = new MusicAdapter(mMusics);
+                    mRecyclerView.setAdapter(mMusicAdapter);
+                }else {
+                    mMusicAdapter.setMusics(mMusics);
+                    mMusicAdapter.notifyDataSetChanged();
+                }
+
+            }
+        });
+
         return view;
     }
+
 
     private class MusicHolder extends RecyclerView.ViewHolder {
 
@@ -107,20 +134,17 @@ public class TracksListFragment extends Fragment {
             mMusicImageView = itemView.findViewById(R.id.music_cover_image);
 
 
-
-
-
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = PlayMusicActivity.newIntent(getActivity(),
                             mMusic.getMId(),
-                            mAlbumArtistName,
-                            mIsAlbumArtistList,
-                            mIsAlbum,
+                            mSearchText[0],
                             false,
                             false,
-                            0);
+                            false,
+                            true,
+                            mSearchType);
                     startActivity(intent);
                 }
             });
@@ -152,6 +176,10 @@ public class TracksListFragment extends Fragment {
         private List<Music> mMusics;
 
         public MusicAdapter(List<Music> musics) {
+            mMusics = musics;
+        }
+
+        public void setMusics(List<Music> musics) {
             mMusics = musics;
         }
 
