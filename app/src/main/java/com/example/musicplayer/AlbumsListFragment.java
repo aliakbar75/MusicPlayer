@@ -26,6 +26,7 @@ import java.util.List;
 public class AlbumsListFragment extends Fragment {
 
     private static final int PAGE_ALBUMS = 1;
+    private static final String TRACKS_LIST_DIALOG = "tracks_list_dialog";
 
     private MusicLab mMusicLab;
 
@@ -87,8 +88,10 @@ public class AlbumsListFragment extends Fragment {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = AlbumTracksActivity.newIntent(getActivity(),mAlbum.getMAlbum(),PAGE_ALBUMS);
-                    startActivity(intent);
+                    TracksListDialogFragment tracksListDialogFragment = TracksListDialogFragment.newInstance(mAlbum.getMAlbum(),PAGE_ALBUMS);
+                    tracksListDialogFragment.show(getFragmentManager(),TRACKS_LIST_DIALOG);
+//                    Intent intent = AlbumTracksActivity.newIntent(getActivity(),mAlbum.getMAlbum(),PAGE_ALBUMS);
+//                    startActivity(intent);
                 }
             });
         }

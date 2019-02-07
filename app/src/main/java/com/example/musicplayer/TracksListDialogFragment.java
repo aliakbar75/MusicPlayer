@@ -2,29 +2,26 @@ package com.example.musicplayer;
 
 
 import android.content.ContentUris;
-import android.content.Intent;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
+
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.design.widget.TextInputEditText;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.example.musicplayer.models.Music;
@@ -36,38 +33,58 @@ import java.util.List;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class SearchDialogFragment extends DialogFragment {
+public class TracksListDialogFragment extends DialogFragment {
 
-    private static final int PAGE_SEARCH = 4;
+    private static final String ARG_ALBUM_ARTIST_NAME = "album_artist_name";
+    private static final String ARG_PAGE = "page";
+    private static final int PAGE_ALBUMS = 1;
+    private static final int PAGE_ARTISTS = 2;
 
-    private TextInputEditText mTextInputEditText;
-    private RadioGroup mRadioGroup;
-    private RadioButton mTracksSearchRadioButton;
-    private RadioButton mAlbumsSearchRadioButton;
-    private RadioButton mArtistsSearchRadioButton;
-    private ImageButton mSearchImageButton;
+    private TextView mAlbumArtistNameTextView;
     private RecyclerView mRecyclerView;
-
     private MusicAdapter mMusicAdapter;
     private List<Music> mMusics;
-    private int mSearchType;
-    private final String[] mSearchText = new String[1];
+    private String mAlbumArtistName;
+    private int mPage;
 
 
+    private Callbacks mCallbacks;
 
+    public interface Callbacks {
+        void changeMusic(Long musicId, String name, int page);
+    }
 
-    public static SearchDialogFragment newInstance() {
+    public static TracksListDialogFragment newInstance(String name, int page) {
 
         Bundle args = new Bundle();
+        args.putString(ARG_ALBUM_ARTIST_NAME,name);
+        args.putInt(ARG_PAGE,page);
 
-        SearchDialogFragment fragment = new SearchDialogFragment();
+        TracksListDialogFragment fragment = new TracksListDialogFragment();
         fragment.setArguments(args);
         return fragment;
     }
 
 
-    public SearchDialogFragment() {
+    public TracksListDialogFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        if (context instanceof Callbacks) {
+            mCallbacks = (Callbacks) context;
+        } else {
+            throw new RuntimeException("Activity not impl callback");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
     }
 
     @Override
@@ -79,51 +96,38 @@ public class SearchDialogFragment extends DialogFragment {
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        mAlbumArtistName = getArguments().getString(ARG_ALBUM_ARTIST_NAME);
+        mPage = getArguments().getInt(ARG_PAGE);
+
+        MusicLab musicLab = MusicLab.getInstance(getActivity());
+
+        if (mPage == PAGE_ALBUMS){
+            mMusics = musicLab.getTracksByAlbumArtistName(mAlbumArtistName,true);
+        }else {
+            mMusics = musicLab.getTracksByAlbumArtistName(mAlbumArtistName,false);
+        }
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_search_dialog, container, false);
-        mTextInputEditText = view.findViewById(R.id.search_text);
-        mTracksSearchRadioButton = view.findViewById(R.id.search_tracks);
-        mAlbumsSearchRadioButton = view.findViewById(R.id.search_albums);
-        mArtistsSearchRadioButton = view.findViewById(R.id.search_artists);
-        mSearchImageButton = view.findViewById(R.id.search_button);
-        mRecyclerView = view.findViewById(R.id.search_recycler_view);
+        View view = inflater.inflate(R.layout.fragment_tracks_list_dialog, container, false);
+        mRecyclerView = view.findViewById(R.id.album_artist_tracks_recycler_view);
+        mAlbumArtistNameTextView = view.findViewById(R.id.album_artist_name);
+
+        mAlbumArtistNameTextView.setText(mAlbumArtistName);
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
-        mMusics = MusicLab.getInstance(getActivity()).search(mSearchText[0], mSearchType);
-
-        mTracksSearchRadioButton.setChecked(true);
-
-        mSearchImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mSearchText[0] = mTextInputEditText.getText().toString();
-
-                if (mTracksSearchRadioButton.isChecked()){
-                    mSearchType = 0;
-                }else if (mAlbumsSearchRadioButton.isChecked()){
-                    mSearchType = 1;
-                }else if (mArtistsSearchRadioButton.isChecked()){
-                    mSearchType = 2;
-                }
-                mMusics = MusicLab.getInstance(getActivity()).search(mSearchText[0], mSearchType);
-
-                if (mMusicAdapter == null){
-                    mMusicAdapter = new MusicAdapter(mMusics);
-                    mRecyclerView.setAdapter(mMusicAdapter);
-                }else {
-                    mMusicAdapter.setMusics(mMusics);
-                    mMusicAdapter.notifyDataSetChanged();
-                }
-
-            }
-        });
-
+        if (mMusicAdapter == null){
+            mMusicAdapter = new MusicAdapter(mMusics);
+            mRecyclerView.setAdapter(mMusicAdapter);
+        }
         return view;
     }
-
 
     private class MusicHolder extends RecyclerView.ViewHolder {
 
@@ -145,12 +149,13 @@ public class SearchDialogFragment extends DialogFragment {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = PlayMusicActivity.newIntent(getActivity(),
-                            mMusic.getMId(),
-                            mSearchText[0],
-                            PAGE_SEARCH,
-                            mSearchType);
-                    startActivity(intent);
+                    mCallbacks.changeMusic(mMusic.getMId(),mAlbumArtistName,mPage);
+//                    Intent intent = PlayMusicActivity.newIntent(getActivity(),
+//                            mMusic.getMId(),
+//                            mAlbumArtistName,
+//                            mPage,
+//                            0);
+//                    startActivity(intent);
                 }
             });
         }
@@ -183,10 +188,6 @@ public class SearchDialogFragment extends DialogFragment {
         private List<Music> mMusics;
 
         public MusicAdapter(List<Music> musics) {
-            mMusics = musics;
-        }
-
-        public void setMusics(List<Music> musics) {
             mMusics = musics;
         }
 

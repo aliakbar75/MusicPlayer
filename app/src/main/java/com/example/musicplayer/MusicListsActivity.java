@@ -14,7 +14,8 @@ import android.view.MenuItem;
 
 import com.example.musicplayer.models.MusicLab;
 
-public class MusicListsActivity extends AppCompatActivity implements TracksListFragment.Callbacks{
+public class MusicListsActivity extends AppCompatActivity implements TracksListFragment.Callbacks,
+        TracksListDialogFragment.Callbacks{
 
     private static final int FAVORITES = 0;
     private static final int TRACKS = 1;
