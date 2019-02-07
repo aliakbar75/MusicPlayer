@@ -248,7 +248,11 @@ public class PlayMusicFragment extends Fragment {
         mNextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCallbacks.changeMusic(mMusicId,NEXT_MUSIC);
+                if (mShuffle){
+                    mCallbacks.changeMusic(mMusicId,SHUFFLE_MUSIC);
+                }else {
+                    mCallbacks.changeMusic(mMusicId,NEXT_MUSIC);
+                }
             }
         });
 

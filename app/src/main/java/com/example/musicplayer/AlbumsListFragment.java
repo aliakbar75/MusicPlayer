@@ -25,6 +25,8 @@ import java.util.List;
  */
 public class AlbumsListFragment extends Fragment {
 
+    private static final int PAGE_ALBUMS = 1;
+
     private MusicLab mMusicLab;
 
     private RecyclerView mRecyclerView;
@@ -85,7 +87,7 @@ public class AlbumsListFragment extends Fragment {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = AlbumTracksActivity.newIntent(getActivity(),mAlbum.getMAlbum(),true);
+                    Intent intent = AlbumTracksActivity.newIntent(getActivity(),mAlbum.getMAlbum(),PAGE_ALBUMS);
                     startActivity(intent);
                 }
             });

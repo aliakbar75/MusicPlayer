@@ -12,13 +12,17 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-public class MusicListsActivity extends AppCompatActivity {
+import com.example.musicplayer.models.MusicLab;
+
+public class MusicListsActivity extends AppCompatActivity implements TracksListFragment.Callbacks{
 
     private static final int FAVORITES = 0;
     private static final int TRACKS = 1;
     private static final int ALBUMS = 2;
     private static final int ARTISTS = 3;
     private static final String DIALOG_SEARCH = "dialog_search";
+
+    private static final int PAGE_TRACKS = 0;
 
     private TabLayout mTabLayout;
     private ViewPager mMusicViewPager;
@@ -42,6 +46,16 @@ public class MusicListsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_music_lists);
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Long firstMusicId = MusicLab.getInstance(this).getTracks().get(0).getMId();
+
+        if (fragmentManager.findFragmentById(R.id.music_container) == null) {
+            fragmentManager.beginTransaction()
+                    .add(R.id.music_container,MusicFragment.newInstance(firstMusicId,null,PAGE_TRACKS,0))
+                    .commit();
+        }
+
         mTabLayout = findViewById(R.id.tab_layout);
         mMusicViewPager = findViewById(R.id.music_view_pager);
 
@@ -54,7 +68,7 @@ public class MusicListsActivity extends AppCompatActivity {
                 if(i==FAVORITES)
                     return FavoritesListFragment.newInstance();
                 if(i==TRACKS)
-                    return TracksListFragment.newInstance(null,false,false);
+                    return TracksListFragment.newInstance(null,PAGE_TRACKS);
                 if(i==ALBUMS)
                     return AlbumsListFragment.newInstance();
                 if(i==ARTISTS)
@@ -87,5 +101,14 @@ public class MusicListsActivity extends AppCompatActivity {
 
         mMusicViewPager.setCurrentItem(TRACKS);
 
+    }
+
+
+    @Override
+    public void changeMusic(Long musicId, String name, int page) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.music_container,MusicFragment.newInstance(musicId,name,page,0))
+                .commit();
     }
 }

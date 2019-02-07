@@ -32,6 +32,8 @@ import java.util.List;
  */
 public class FavoritesListFragment extends Fragment {
 
+    private static final int PAGE_FAVORITES = 3;
+
     private MusicLab mMusicLab;
 
     private RecyclerView mRecyclerView;
@@ -113,10 +115,7 @@ public class FavoritesListFragment extends Fragment {
                     Intent intent = PlayMusicActivity.newIntent(getActivity(),
                             mMusic.getMId(),
                             null,
-                            false,
-                            false,
-                            true,
-                            false,
+                            PAGE_FAVORITES,
                             0);
                     startActivity(intent);
                 }

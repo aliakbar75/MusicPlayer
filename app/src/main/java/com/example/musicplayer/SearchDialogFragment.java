@@ -37,6 +37,8 @@ import java.util.List;
  */
 public class SearchDialogFragment extends DialogFragment {
 
+    private static final int PAGE_SEARCH = 4;
+
     private TextInputEditText mTextInputEditText;
     private RadioGroup mRadioGroup;
     private RadioButton mTracksSearchRadioButton;
@@ -144,10 +146,7 @@ public class SearchDialogFragment extends DialogFragment {
                     Intent intent = PlayMusicActivity.newIntent(getActivity(),
                             mMusic.getMId(),
                             mSearchText[0],
-                            false,
-                            false,
-                            false,
-                            true,
+                            PAGE_SEARCH,
                             mSearchType);
                     startActivity(intent);
                 }

@@ -2,6 +2,7 @@ package com.example.musicplayer;
 
 
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -32,24 +33,39 @@ import java.util.List;
 public class TracksListFragment extends Fragment {
 
     private static final String ARG_ALBUM_ARTIST_NAME = "album_artist_name";
-    private static final String ARG_IS_ALBUM_ARTIST_LIST = "is_album_artist_list";
-    private static final String ARG_IS_ALBUM = "is_album";
+    private static final String ARG_PAGE = "page";
+//    private static final String ARG_IS_ALBUM_ARTIST_LIST = "is_album_artist_list";
+//    private static final String ARG_IS_ALBUM = "is_album";
+
+    private static final int PAGE_TRACKS = 0;
+    private static final int PAGE_ALBUMS = 1;
+    private static final int PAGE_ARTISTS = 2;
+
+
     private MusicLab mMusicLab;
 
     private RecyclerView mRecyclerView;
     private MusicAdapter mMusicAdapter;
     private List<Music> mMusics;
     private String mAlbumArtistName;
-    private boolean mIsAlbumArtistList;
-    private boolean mIsAlbum;
+    private int mPage;
+//    private boolean mIsAlbumArtistList;
+//    private boolean mIsAlbum;
+
+    private Callbacks mCallbacks;
+
+    public interface Callbacks {
+        void changeMusic(Long musicId, String name, int page);
+    }
 
 
-    public static TracksListFragment newInstance(String name,boolean isAlbumArtistList,boolean isAlbum) {
+    public static TracksListFragment newInstance(String name,int page) {
         
         Bundle args = new Bundle();
         args.putString(ARG_ALBUM_ARTIST_NAME,name);
-        args.putBoolean(ARG_IS_ALBUM_ARTIST_LIST,isAlbumArtistList);
-        args.putBoolean(ARG_IS_ALBUM,isAlbum);
+        args.putInt(ARG_PAGE,page);
+//        args.putBoolean(ARG_IS_ALBUM_ARTIST_LIST,isAlbumArtistList);
+//        args.putBoolean(ARG_IS_ALBUM,isAlbum);
         TracksListFragment fragment = new TracksListFragment();
         fragment.setArguments(args);
         return fragment;
@@ -61,18 +77,44 @@ public class TracksListFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        if (context instanceof Callbacks) {
+            mCallbacks = (Callbacks) context;
+        } else {
+            throw new RuntimeException("Activity not impl callback");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
+    }
+
+    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mAlbumArtistName = getArguments().getString(ARG_ALBUM_ARTIST_NAME);
-        mIsAlbumArtistList = getArguments().getBoolean(ARG_IS_ALBUM_ARTIST_LIST);
-        mIsAlbum = getArguments().getBoolean(ARG_IS_ALBUM);
+        mPage = getArguments().getInt(ARG_PAGE);
+//        mIsAlbumArtistList = getArguments().getBoolean(ARG_IS_ALBUM_ARTIST_LIST);
+//        mIsAlbum = getArguments().getBoolean(ARG_IS_ALBUM);
         mMusicLab = MusicLab.getInstance(getActivity());
-        if (!mIsAlbumArtistList){
+
+        if (mPage == PAGE_TRACKS){
             mMusics = mMusicLab.getTracks();
+        }else if (mPage == PAGE_ALBUMS){
+            mMusics = mMusicLab.getTracksByAlbumArtistName(mAlbumArtistName,true);
         }else {
-            mMusics = mMusicLab.getTracksByAlbumArtistName(mAlbumArtistName,mIsAlbum);
+            mMusics = mMusicLab.getTracksByAlbumArtistName(mAlbumArtistName,false);
         }
+//        if (!mIsAlbumArtistList){
+//            mMusics = mMusicLab.getTracks();
+//        }else {
+//            mMusics = mMusicLab.getTracksByAlbumArtistName(mAlbumArtistName,mIsAlbum);
+//        }
 
     }
 
@@ -114,15 +156,13 @@ public class TracksListFragment extends Fragment {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = PlayMusicActivity.newIntent(getActivity(),
-                            mMusic.getMId(),
-                            mAlbumArtistName,
-                            mIsAlbumArtistList,
-                            mIsAlbum,
-                            false,
-                            false,
-                            0);
-                    startActivity(intent);
+                    mCallbacks.changeMusic(mMusic.getMId(),mAlbumArtistName,mPage);
+//                    Intent intent = PlayMusicActivity.newIntent(getActivity(),
+//                            mMusic.getMId(),
+//                            mAlbumArtistName,
+//                            mPage,
+//                            0);
+//                    startActivity(intent);
                 }
             });
         }
