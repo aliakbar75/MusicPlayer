@@ -2,6 +2,7 @@ package com.example.musicplayer;
 
 
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -53,7 +54,11 @@ public class SearchDialogFragment extends DialogFragment {
     private int mSearchType;
     private final String[] mSearchText = new String[1];
 
+    private Callbacks mCallbacks;
 
+    public interface Callbacks {
+        void changeMusic(Long musicId, String name, int page,int searchType);
+    }
 
 
     public static SearchDialogFragment newInstance() {
@@ -68,6 +73,23 @@ public class SearchDialogFragment extends DialogFragment {
 
     public SearchDialogFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        if (context instanceof Callbacks) {
+            mCallbacks = (Callbacks) context;
+        } else {
+            throw new RuntimeException("Activity not impl callback");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
     }
 
     @Override
@@ -145,12 +167,13 @@ public class SearchDialogFragment extends DialogFragment {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = PlayMusicActivity.newIntent(getActivity(),
-                            mMusic.getMId(),
-                            mSearchText[0],
-                            PAGE_SEARCH,
-                            mSearchType);
-                    startActivity(intent);
+                    mCallbacks.changeMusic(mMusic.getMId(),mSearchText[0],PAGE_SEARCH,mSearchType);
+//                    Intent intent = PlayMusicActivity.newIntent(getActivity(),
+//                            mMusic.getMId(),
+//                            mSearchText[0],
+//                            PAGE_SEARCH,
+//                            mSearchType);
+//                    startActivity(intent);
                 }
             });
         }

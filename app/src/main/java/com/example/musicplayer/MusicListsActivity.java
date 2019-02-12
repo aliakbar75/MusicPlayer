@@ -1,7 +1,12 @@
 package com.example.musicplayer;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -15,7 +20,7 @@ import android.view.MenuItem;
 import com.example.musicplayer.models.MusicLab;
 
 public class MusicListsActivity extends AppCompatActivity implements TracksListFragment.Callbacks,
-        TracksListDialogFragment.Callbacks{
+        TracksListDialogFragment.Callbacks,FavoritesListFragment.Callbacks,SearchDialogFragment.Callbacks{
 
     private static final int FAVORITES = 0;
     private static final int TRACKS = 1;
@@ -48,12 +53,18 @@ public class MusicListsActivity extends AppCompatActivity implements TracksListF
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_music_lists);
 
+//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
+//            if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
+//                ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},1);
+//            }
+//        }
+
         FragmentManager fragmentManager = getSupportFragmentManager();
         Long firstMusicId = MusicLab.getInstance(this).getTracks().get(0).getMId();
 
         if (fragmentManager.findFragmentById(R.id.music_container) == null) {
             fragmentManager.beginTransaction()
-                    .add(R.id.music_container,MusicFragment.newInstance(firstMusicId,null,PAGE_TRACKS,0))
+                    .add(R.id.music_container,MusicFragment.newInstance(firstMusicId,null,PAGE_TRACKS,0,true))
                     .commit();
         }
 
@@ -104,12 +115,32 @@ public class MusicListsActivity extends AppCompatActivity implements TracksListF
 
     }
 
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//
+//        if (requestCode == 1){
+//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+//
+//            }else {
+//
+//            }
+//        }
+//    }
 
     @Override
     public void changeMusic(Long musicId, String name, int page) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
-                .replace(R.id.music_container,MusicFragment.newInstance(musicId,name,page,0))
+                .replace(R.id.music_container,MusicFragment.newInstance(musicId,name,page,0,false))
+                .commit();
+    }
+
+    @Override
+    public void changeMusic(Long musicId, String name, int page, int searchType) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.music_container,MusicFragment.newInstance(musicId,name,page,searchType,false))
                 .commit();
     }
 }

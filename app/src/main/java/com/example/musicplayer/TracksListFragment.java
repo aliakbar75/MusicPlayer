@@ -110,11 +110,6 @@ public class TracksListFragment extends Fragment {
         }else {
             mMusics = mMusicLab.getTracksByAlbumArtistName(mAlbumArtistName,false);
         }
-//        if (!mIsAlbumArtistList){
-//            mMusics = mMusicLab.getTracks();
-//        }else {
-//            mMusics = mMusicLab.getTracksByAlbumArtistName(mAlbumArtistName,mIsAlbum);
-//        }
 
     }
 
